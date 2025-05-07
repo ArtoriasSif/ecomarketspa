@@ -8,19 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 public class InventarioServiceImpl implements InventarioService{
 
-    @Autowired
-    private InventarioRepository inventarioRepository;
-
-    @Autowired
-    ProductoRepository productoRepository;
-
-    public Inventario crearInventario(Long productoId, Long cantidad){
-        Producto producto = productoRepository.findById(productoId).orElseThrow(
-                ()-> new ProductoException("Producto no encontrado")
-        );
-
-
-    }
-
 
 }
