@@ -1,5 +1,4 @@
-package com.nebulosa.msvc_inventario.models;
-
+package com.nebulosa.msvc_productos.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -27,6 +26,5 @@ public class Producto {
     @Column(nullable = false)
     @NotNull(message = "El campo precio no puede ser vacio")
     private Long precio;
-
 
 }

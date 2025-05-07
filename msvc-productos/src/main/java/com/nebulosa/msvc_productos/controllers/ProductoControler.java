@@ -1,5 +1,7 @@
-package com.nebulosa.msvc_inventario.controllers;
+package com.nebulosa.msvc_productos.controllers;
 
+import com.nebulosa.msvc_productos.models.Producto;
+import com.nebulosa.msvc_productos.services.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,16 +14,16 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/v1/inventario")
 @Validated
-public class InventarioControler {
+public class ProductoControler {
 
     @Autowired
     private ProductoService productoService;
 
     @GetMapping
     public ResponseEntity<List<Producto>> getAllProductos(){
-    return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(productoService.findAllProducto());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(productoService.findAllProducto());
     }
 
     @GetMapping("/{id}")
@@ -37,5 +39,4 @@ public class InventarioControler {
                 .status(HttpStatus.CREATED)
                 .body(productoService.save(producto));
     }
-
 }

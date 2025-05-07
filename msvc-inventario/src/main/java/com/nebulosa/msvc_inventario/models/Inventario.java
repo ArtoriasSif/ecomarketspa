@@ -16,11 +16,10 @@ public class Inventario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inventario_id")
-    private Long pacienteId;
+    private Long inventarioId;
 
-    @OneToOne
-    @JoinColumn(name="producto_id",nullable = false)
-    private Producto producto;
+    @Column(nullable = false)
+    private Long idProducto;
 
     @Column(nullable = false)
     private Long cantidad;

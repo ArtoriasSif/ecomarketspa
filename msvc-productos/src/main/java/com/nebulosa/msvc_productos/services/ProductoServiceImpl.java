@@ -1,8 +1,8 @@
-package com.nebulosa.msvc_inventario.services;
+package com.nebulosa.msvc_productos.services;
 
-import com.nebulosa.msvc_inventario.exceptions.ProductoException;
-import com.nebulosa.msvc_inventario.models.Producto;
-import com.nebulosa.msvc_inventario.repositories.ProductoRepository;
+import com.nebulosa.msvc_productos.exceptions.ProductoException;
+import com.nebulosa.msvc_productos.models.Producto;
+import com.nebulosa.msvc_productos.repositories.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class ProductoServiceImpl implements ProductoService {
+public class ProductoServiceImpl {
 
     @Autowired
     private ProductoRepository inventarioRepository;
 
     @Transactional(readOnly = true)
     @Override
-    public List<Producto>findAllProducto(){
+    public List<Producto> findAllProducto(){
         return inventarioRepository.findAll();
     }
 

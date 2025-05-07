@@ -1,6 +1,6 @@
-package com.nebulosa.msvc_inventario.services;
+package com.nebulosa.msvc_productos.services;
 
-import com.nebulosa.msvc_inventario.models.Producto;
+import com.nebulosa.msvc_productos.models.Producto;
 
 import java.util.List;
 
@@ -9,4 +9,4 @@ public interface ProductoService {
     Producto findByIdProducto(Long id);
     Producto save (Producto producto);
 
- }
+}
