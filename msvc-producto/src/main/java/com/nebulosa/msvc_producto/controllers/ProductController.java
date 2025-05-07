@@ -1,7 +1,7 @@
-package com.nebulosa.msvc_productos.controllers;
+package com.nebulosa.msvc_producto.controllers;
 
-import com.nebulosa.msvc_productos.models.Producto;
-import com.nebulosa.msvc_productos.services.ProductoService;
+import com.nebulosa.msvc_producto.models.Product;
+import com.nebulosa.msvc_producto.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,29 +14,29 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/v1/inventario")
 @Validated
-public class ProductoControler {
+public class ProductController {
 
     @Autowired
-    private ProductoService productoService;
+    private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Producto>> getAllProductos(){
+    public ResponseEntity<List<Product>> getAllProductos(){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productoService.findAllProducto());
+                .body(productService.findAllProducto());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Producto>getProductoById(@PathVariable Long id){
+    public ResponseEntity<Product>getProductoById(@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productoService.findByIdProducto(id));
+                .body(productService.findByIdProducto(id));
     }
 
     @PostMapping
-    public ResponseEntity<Producto> createProducto(@Validated @RequestBody Producto producto){
+    public ResponseEntity<Product> createProducto(@Validated @RequestBody Product producto){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(productoService.save(producto));
+                .body(productService.save(producto));
     }
 }

@@ -16,7 +16,7 @@
     <modules>
         <module>msvc-inventario</module>
         <module>msvc-sucursal</module>
-        <module>msvc-productos</module>
+        <module>msvc-producto</module>
     </modules>
     <properties>
         <java.version>21</java.version>

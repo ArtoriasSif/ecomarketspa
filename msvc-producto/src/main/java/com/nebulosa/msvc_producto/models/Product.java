@@ -1,4 +1,4 @@
-package com.nebulosa.msvc_productos.models;
+package com.nebulosa.msvc_producto.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -6,13 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name ="productos")
+@Table(name ="producto")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Producto {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +26,4 @@ public class Producto {
     @Column(nullable = false)
     @NotNull(message = "El campo precio no puede ser vacio")
     private Long precio;
-
 }
