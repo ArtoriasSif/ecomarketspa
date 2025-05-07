@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface SucursalRepository extends JpaRepository<Sucursal, Long> {
 
-    Optional<Sucursal> findById(Long IdSucursal);
 
 }
