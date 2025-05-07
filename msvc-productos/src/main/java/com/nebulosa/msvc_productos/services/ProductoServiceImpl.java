@@ -10,21 +10,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class ProductoServiceImpl {
+public class ProductoServiceImpl implements ProductoService{
 
     @Autowired
-    private ProductoRepository inventarioRepository;
+    private ProductoRepository productoRepository;
 
     @Transactional(readOnly = true)
     @Override
     public List<Producto> findAllProducto(){
-        return inventarioRepository.findAll();
+        return productoRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
     public Producto findByIdProducto(Long id){
-        return inventarioRepository.findById(id).orElseThrow(
+        return productoRepository.findById(id).orElseThrow(
                 ()-> new ProductoException("Producto con el id "+id+" no encontrado")
         );
     }
@@ -32,11 +32,11 @@ public class ProductoServiceImpl {
     @Transactional(readOnly = true)
     @Override
     public  Producto save(Producto producto){
-        if (inventarioRepository.findById(producto.getProductoId()).isPresent()){
+        if (productoRepository.findById(producto.getProductoId()).isPresent()){
             throw new ProductoException("Producto con el id "+producto.getProductoId()+" ya existente");
         }
 
-        return inventarioRepository.save(producto);
+        return productoRepository.save(producto);
     }
 
 }

@@ -14,28 +14,6 @@ import java.util.List;
 @Validated
 public class InventarioControler {
 
-    @Autowired
-    private ProductoService productoService;
 
-    @GetMapping
-    public ResponseEntity<List<Producto>> getAllProductos(){
-    return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(productoService.findAllProducto());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Producto>getProductoById(@PathVariable Long id){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productoService.findByIdProducto(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<Producto> createProducto(@Validated @RequestBody Producto producto){
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(productoService.save(producto));
-    }
 
 }
