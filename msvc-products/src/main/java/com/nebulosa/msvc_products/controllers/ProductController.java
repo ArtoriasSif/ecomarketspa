@@ -39,4 +39,23 @@ public class ProductController {
                 .status(HttpStatus.CREATED)
                 .body(productService.save(producto));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProducto(@PathVariable Long id, @Validated @RequestBody Product producto){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(productService.updatePrice(id, producto.getPrecio()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProducto(@PathVariable Long id){
+        try{
+            productService.deleteByIdProducto(id);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Producto eliminado exitosamente");
+        } catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ex.getMessage());
+        }
+    }
 }

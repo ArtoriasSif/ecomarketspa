@@ -38,4 +38,27 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
+    @Transactional
+    @Override
+    public Product updatePrice(Long id, Long price){
+        return productRepository.findById(id).map(p -> {
+            if (price < 0){
+                throw new ProductException("El precio no puede ser negativo");
+            }
+            p.setPrecio(price);
+            return productRepository.save(p);
+        }).orElseThrow(
+                () -> new ProductException("No se encontro el producto con id: " + id)
+        );
+    }
+
+    @Transactional
+    @Override
+    public void deleteByIdProducto(Long id){
+        if (productRepository.findById(id).isPresent()){
+            productRepository.deleteById(id);
+        }else{
+            throw new ProductException("No se encontro el producto con id: " + id);
+        }
+    }
 }

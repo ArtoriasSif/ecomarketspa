@@ -1,5 +1,9 @@
 package com.nebulosa.msvc_inventario.controllers;
 
+import com.nebulosa.msvc_inventario.models.entities.Inventory;
+import com.nebulosa.msvc_inventario.services.InventoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +12,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/inventario")
 @Validated
 public class InventoryController {
+    //NO SE PUEDE PROBAR HASTA QUE TERMINEN MSVC-SUCURSAL
+    @Autowired
+    private InventoryService inventoryService;
 
+    @PostMapping
+    public ResponseEntity<Inventory> createInventory(@Validated @RequestBody Inventory inventory){
+        return ResponseEntity
+                .status(201)
+                .body(inventoryService.save(inventory));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Inventory> updateInventory(@PathVariable Long id, @Validated @RequestBody Inventory inventory){
+        return ResponseEntity
+                .status(200)
+                .body(inventoryService.updateQuantity(id, inventory.getCantidad()));
+    }
 
 
 }

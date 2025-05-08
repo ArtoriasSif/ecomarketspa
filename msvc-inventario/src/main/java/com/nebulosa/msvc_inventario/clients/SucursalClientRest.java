@@ -1,18 +1,17 @@
 package com.nebulosa.msvc_inventario.clients;
 
-import com.nebulosa.msvc_inventario.models.Product;
+import com.nebulosa.msvc_inventario.models.Sucursal;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-products", url = "http://localhost:8083/api/v1/products")
-public interface ProductoClientRest {
-
+@FeignClient(name = "msvc-inventario", url = "http://localhost:8081/api/v1/msvc-inventario")
+public interface SucursalClientRest {
     @GetMapping
-    List<Product> findAll();
+    List<Sucursal> findAll();
 
     @GetMapping("/{id}")
-    Product findByIdProducto(@PathVariable Long id);
+    Sucursal findByIdSucursal(@PathVariable Long id);
 }
