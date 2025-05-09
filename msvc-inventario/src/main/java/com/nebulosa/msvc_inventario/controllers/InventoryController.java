@@ -30,5 +30,15 @@ public class InventoryController {
                 .body(inventoryService.updateQuantity(id, inventory.getCantidad()));
     }
 
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteInventory(@PathVariable Long id){
+        try{
+            inventoryService.deleteById(id);
+            return ResponseEntity.status(200)
+                    .body("Inventario eliminado exitosamente");
+        } catch (Exception ex){
+            return ResponseEntity.status(404)
+                    .body(ex.getMessage());
+        }
+    }
 }
