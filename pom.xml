@@ -17,6 +17,7 @@
         <module>msvc-inventario</module> <!-- port= 8081 -->
         <module>msvc-sucursal</module>   <!-- port= 8082 -->
         <module>msvc-products</module>   <!-- port= 8083 -->
+        <module>msvc-usuarios</module><!-- port= 8084 -->
     </modules>
     <properties>
         <java.version>21</java.version>
