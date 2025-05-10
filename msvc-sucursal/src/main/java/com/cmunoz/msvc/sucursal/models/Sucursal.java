@@ -21,6 +21,10 @@ public class Sucursal {
     @Column(name = "sucursal_id")
     private Long IdSucursal;
 
+    @Column
+    @NotBlank
+    private String nombreSucursal;
+
     @Column(unique = true, nullable = false)
     @NotBlank(message = "El campo direccion no puede estar vacio")
     @Pattern(regexp = "([1-9][0-9]{0,3})\\s+[A-Za-zÁÉÍÓÚáéíóúñÑüÜ ]+", message = "El campo direccion tiene que llevar el siguiente formato 'XXXX LETRAS'")
