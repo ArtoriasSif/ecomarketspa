@@ -21,28 +21,28 @@ public class SucursalController {
     @Autowired
     private SucursalService sucursalService;
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<List<Sucursal>> getAllSucursales() {
         return ResponseEntity
                 .ok()
                 .body(sucursalService.findAllSucursal());
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<Sucursal> getSucursalById(@PathVariable long id) {
         return ResponseEntity
                 .ok()
                 .body(sucursalService.findById(id));
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<Sucursal> getSucursalByNombreSucursal(@PathVariable String nombreSucursal) {
         return ResponseEntity
                 .ok()
                 .body(sucursalService.findByNombreSucursal(nombreSucursal));
     }
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<Sucursal> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
                 .ok()
