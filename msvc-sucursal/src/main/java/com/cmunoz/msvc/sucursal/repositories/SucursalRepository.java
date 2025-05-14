@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface SucursalRepository extends JpaRepository<Sucursal, Long> {
 
     Optional<Sucursal> findByNombreSucursal(String nombreSucursal);
+
+
 }

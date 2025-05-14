@@ -23,7 +23,7 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public Sucursal findById(Long id) {
+    public Sucursal findByIdSucursal(Long id) {
         return SucursalRepository.findById(id).orElseThrow(
                 ()-> new SucursalException("No se encontro la sucursal con id: " + id)
         );
@@ -48,7 +48,7 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public void deleteById(Long id) {
+    public void deleteByIdSucursal(Long id) {
         if(SucursalRepository.findById(id).isPresent()) {
             SucursalRepository.deleteById(id);
         }else{

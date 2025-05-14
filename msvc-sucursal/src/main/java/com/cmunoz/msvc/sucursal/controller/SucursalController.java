@@ -28,31 +28,31 @@ public class SucursalController {
                 .body(sucursalService.findAllSucursal());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Sucursal> getSucursalById(@PathVariable Long id) {
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Sucursal> getSucursalFindById(@PathVariable Long id) {
         return ResponseEntity
-                .ok()
-                .body(sucursalService.findById(id));
+                .status(200)
+                .body(sucursalService.findByIdSucursal(id));
     }
 
-    @GetMapping("/{nombreSucursal}")
-    public ResponseEntity<Sucursal> getSucursalByNombreSucursal( @PathVariable String nombreSucursal) {
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<Sucursal> getSucursalByNombreSucursal( @PathVariable String nombre) {
         return ResponseEntity
-                .ok()
-                .body(sucursalService.findByNombreSucursal(nombreSucursal));
+                .status(200)
+                .body(sucursalService.findByNombreSucursal(nombre));
     }
 
     @PostMapping()
     public ResponseEntity<Sucursal> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
-                .ok()
+                .status(201)
                 .body(sucursalService.save(sucursal));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSucursal(@PathVariable Long id) {
         try{
-            sucursalService.deleteById(id);
+            sucursalService.deleteByIdSucursal(id);
             return ResponseEntity.status(HttpStatus.OK)
                     .body("Sucursal eliminada exitosamente");
         } catch (Exception ex){

@@ -8,8 +8,8 @@ public interface SucursalService {
 
     List<Sucursal> findAllSucursal();
     Sucursal findByNombreSucursal(String nombreSucursal);
-    Sucursal findById(Long id);
+    Sucursal findByIdSucursal(Long id);
     Sucursal save(Sucursal sucursal);
-    void deleteById(Long id);
+    void deleteByIdSucursal(Long id);
 
 }
