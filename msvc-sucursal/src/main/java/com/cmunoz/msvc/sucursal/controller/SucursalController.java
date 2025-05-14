@@ -21,7 +21,7 @@ public class SucursalController {
     @Autowired
     private SucursalService sucursalService;
 
-    @GetMapping("/{id}")
+    @GetMapping
     public ResponseEntity<List<Sucursal>> getAllSucursales() {
         return ResponseEntity
                 .ok()
@@ -29,14 +29,14 @@ public class SucursalController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sucursal> getSucursalById(@PathVariable long id) {
+    public ResponseEntity<Sucursal> getSucursalById(@PathVariable Long id) {
         return ResponseEntity
                 .ok()
                 .body(sucursalService.findById(id));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Sucursal> getSucursalByNombreSucursal(@PathVariable String nombreSucursal) {
+    @GetMapping("/{nombreSucursal}")
+    public ResponseEntity<Sucursal> getSucursalByNombreSucursal( @PathVariable String nombreSucursal) {
         return ResponseEntity
                 .ok()
                 .body(sucursalService.findByNombreSucursal(nombreSucursal));
@@ -49,7 +49,7 @@ public class SucursalController {
                 .body(sucursalService.save(sucursal));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSucursal(@PathVariable Long id) {
         try{
             sucursalService.deleteById(id);

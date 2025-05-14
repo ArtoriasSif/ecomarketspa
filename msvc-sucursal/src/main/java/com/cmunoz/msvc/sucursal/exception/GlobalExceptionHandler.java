@@ -39,9 +39,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SucursalException.class)
-    public ResponseEntity<SucursalDTO> handleProductException(SucursalException ex){
-        Map<String,String> errorMap = Collections.singletonMap("product",ex.getMessage());
+    public ResponseEntity<SucursalDTO> handleSucursalException(SucursalException ex){
+        Map<String,String> errorMap = Collections.singletonMap("sucursal",ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(this.createErrorDTO(HttpStatus.NOT_FOUND.value(),new Date(),errorMap));
+
     }
 }
