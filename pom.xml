@@ -19,6 +19,7 @@
         <module>msvc-products</module>   <!-- port= 8083 -->
         <module>msvc-usuarios</module>   <!-- port= 8084 -->
         <module>msvc-pedidos</module>    <!-- port= 8085 -->
+        <module>msvc-feedback</module>   <!-- port= 8086 -->
     </modules>
     <properties>
         <java.version>21</java.version>
