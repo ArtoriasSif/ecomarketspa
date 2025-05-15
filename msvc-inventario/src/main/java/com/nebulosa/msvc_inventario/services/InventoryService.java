@@ -7,8 +7,9 @@ import java.util.List;
 
 public interface InventoryService {
 
+    Inventory findById(Long id);
     Inventory save (Inventory inventory);
-    Inventory updateQuantity(Long idInventory , Long quantity);
+    Inventory updateQuantity(Long idInventory , Inventory inventory);
     void deleteById(Long id);
     Inventory findByProductoAndSucursal(Long productoId, Long idSucursal);
     List<Inventory> findByIdSucursal(Long idSucursal);

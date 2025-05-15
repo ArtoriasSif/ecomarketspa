@@ -1,5 +1,6 @@
 package com.nebulosa.msvc_products.controllers;
 
+import com.nebulosa.msvc_products.dtos.ProductoResponseDTO;
 import com.nebulosa.msvc_products.models.Product;
 import com.nebulosa.msvc_products.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,28 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProductos(){
+    public ResponseEntity<List<ProductoResponseDTO>> getAllProductos(){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productService.findAllProduct());
+                .body(productService.findAllProductDTO());
     }
 
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<Product> getProductosByNombre(@PathVariable String nombre){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(productService.findByNombreProducto(nombre));
+    }
+
+
     @GetMapping("/{id}")
-    public ResponseEntity<Product>getProductoById(@PathVariable Long id){
+    public ResponseEntity<Product> getProductoById(@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.findByIdProducto(id));
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProducto(@Validated @RequestBody Product producto){
+    public ResponseEntity<ProductoResponseDTO> createProducto(@Validated @RequestBody Product producto){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(productService.save(producto));

@@ -1,5 +1,6 @@
 package com.nebulosa.msvc_products.services;
 
+import com.nebulosa.msvc_products.dtos.ProductoResponseDTO;
 import com.nebulosa.msvc_products.exceptions.ProductException;
 import com.nebulosa.msvc_products.models.Product;
 import com.nebulosa.msvc_products.repositories.ProductRepository;
@@ -7,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -17,9 +20,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Product>  findAllProduct(){
+    public List<Product> findAll() {
         return productRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ProductoResponseDTO> findAllProductDTO() {
+        List<Product> productos = productRepository.findAll();
+
+        return productos.stream()
+                .map(product -> new ProductoResponseDTO(
+                        "Producto agregado exitosamente",
+                        product.getPrecio(),
+                        product.getNombreProducto()
+                ))
+                .collect(Collectors.toList());
+    }
+
 
     @Transactional(readOnly = true)
     @Override
@@ -31,11 +49,33 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public  Product save(Product product){
-        if (productRepository.findByNombreProducto(product.getNombreProducto()).isPresent()){
-            throw new ProductException("El producto con el nombre "+product.getNombreProducto()+" ya existe");
+    public Product findByNombreProducto(String nombre){
+        return productRepository.findByNombreProducto(nombre).orElseThrow(
+                ()-> new ProductException("Producto con el nombre "+nombre+" no encontrado")
+        );
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public ProductoResponseDTO save(Product product){
+        String nombre = product.getNombreProducto().trim();
+        String capitalizado = Arrays.stream(nombre.split("\\s+"))
+                .map(p -> p.substring(0, 1).toUpperCase() + p.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+
+        //validar que no exista producto con ese nombre
+        if (productRepository.findByNombreProducto(capitalizado).isPresent()){
+            throw new ProductException("Ya existe un producto con el nombre: " + capitalizado);
         }
-        return productRepository.save(product);
+        product.setNombreProducto(capitalizado);
+        productRepository.save(product);
+
+        return new ProductoResponseDTO(
+                "Producto del codigo : "+ product.getIdProducto()+" agregado exitosamente",
+                product.getPrecio(),
+                product.getNombreProducto()
+        );
     }
 
     @Transactional
