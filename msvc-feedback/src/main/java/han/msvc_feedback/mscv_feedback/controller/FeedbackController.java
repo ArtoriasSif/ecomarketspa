@@ -1,5 +1,6 @@
 package han.msvc_feedback.mscv_feedback.controller;
 
+import han.msvc_feedback.mscv_feedback.dto.FeedbackResponseDTO;
 import han.msvc_feedback.mscv_feedback.model.entity.Feedback;
 import han.msvc_feedback.mscv_feedback.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class FeedbackController {
     private FeedbackService feedbackService;
 
     @PostMapping()
-    public ResponseEntity<Feedback> save(@Validated @RequestBody Feedback feedback) {
+    public ResponseEntity<FeedbackResponseDTO> save(@Validated @RequestBody Feedback feedback) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(feedbackService.save(feedback));
