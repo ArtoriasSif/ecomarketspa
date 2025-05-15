@@ -1,5 +1,6 @@
 package com.nebulosa.msvc_inventario.controllers;
 
+
 import com.nebulosa.msvc_inventario.models.entities.Inventory;
 import com.nebulosa.msvc_inventario.services.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,20 @@ public class InventoryController {
     //NO SE PUEDE PROBAR HASTA QUE TERMINEN MSVC-SUCURSAL
     @Autowired
     private InventoryService inventoryService;
+
+
+
+    @GetMapping
+    public ResponseEntity<Inventory> findByProductoAndSucursal(
+            @RequestParam Long idProducto,
+            @RequestParam Long idSucursal
+    ) {
+        Inventory inventario = inventoryService.findByProductoAndSucursal(idProducto, idSucursal);
+        if (inventario == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(inventario);
+    }
 
     @PostMapping
     public ResponseEntity<Inventory> createInventory(@Validated @RequestBody Inventory inventory){

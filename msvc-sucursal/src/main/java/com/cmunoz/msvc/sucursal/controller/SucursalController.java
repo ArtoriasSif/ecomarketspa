@@ -28,11 +28,10 @@ public class SucursalController {
                 .body(sucursalService.findAllSucursal());
     }
 
+
     @GetMapping("/id/{id}")
     public ResponseEntity<Sucursal> getSucursalFindById(@PathVariable Long id) {
-        return ResponseEntity
-                .status(200)
-                .body(sucursalService.findByIdSucursal(id));
+        return ResponseEntity.ok(sucursalService.findByIdSucursal(id));
     }
 
     @GetMapping("/nombre/{nombre}")

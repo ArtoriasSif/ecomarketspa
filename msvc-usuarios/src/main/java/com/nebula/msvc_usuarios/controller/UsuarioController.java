@@ -20,7 +20,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getUsuario(@PathVariable Long id) {
+    public ResponseEntity<Usuario> findById(@PathVariable Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(usuarioService.findById(id));

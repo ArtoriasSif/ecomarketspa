@@ -3,11 +3,10 @@ package com.nebulosa.msvc_inventario.services;
 import com.nebulosa.msvc_inventario.clients.ProductoClientRest;
 import com.nebulosa.msvc_inventario.clients.SucursalClientRest;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
-import com.nebulosa.msvc_inventario.models.Product;
-import com.nebulosa.msvc_inventario.models.Sucursal;
+import feign.FeignException;
+import feign.FeignException.NotFound;
 import com.nebulosa.msvc_inventario.models.entities.Inventory;
 import com.nebulosa.msvc_inventario.repositories.InventoryRepository;
-import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,22 +25,33 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
+    public Inventory findByProductoAndSucursal(Long idProducto, Long idSucursal) {
+        return inventoryRepository.findByIdProductoAndIdSucursal(idProducto, idSucursal)
+                .orElseThrow(() -> new InventoryException("No se encontró inventario con productoId " + idProducto + " y sucursalId " + idSucursal));
+    }
+
+    @Transactional
+    @Override
     public Inventory save(Inventory inventory) {
         try {
-            productoClientRest.findByIdProducto(inventory.getProductoId());
-        } catch (FeignException ex) {
-            throw new InventoryException("No se encontró el producto con id: " + inventory.getProductoId());
+            productoClientRest.findByIdProducto(inventory.getIdProducto());
+        } catch (NotFound ex) {
+            throw new InventoryException("No se encontró el producto con id: " + inventory.getIdProducto());
         }
+
         try {
-            sucursalClientRest.findByIdSucursal(inventory.getSucursalId());
-        } catch (FeignException ex) {
-            throw new InventoryException("No se encontró la sucursal con id: " + inventory.getSucursalId());
+            sucursalClientRest.findByIdSucursal(inventory.getIdSucursal());
+        } catch (NotFound ex) {
+            throw new InventoryException("No se encontró la sucursal con id: " + inventory.getIdSucursal());
         }
-        if (inventoryRepository.findByProductoIdAndSucursalId(inventory.getProductoId(), inventory.getSucursalId()).isPresent()) {
-            throw new InventoryException("La sucursal " + inventory.getSucursalId() +
-                    " ya contiene el producto " + inventory.getProductoId() +
-                    ". Actualice el inventario con ID: " + inventory.getInventarioId());
-        }
+
+        inventoryRepository.findByIdProductoAndIdSucursal(inventory.getIdProducto(), inventory.getIdSucursal())
+                .ifPresent(existingInventory -> {
+                    throw new InventoryException("Ya existe un inventario para el producto " +
+                            inventory.getIdProducto() + " en la sucursal " + inventory.getIdSucursal() +
+                            ". Actualice el inventario con ID: " + existingInventory.getIdInventario());
+                });
+
         return inventoryRepository.save(inventory);
     }
 

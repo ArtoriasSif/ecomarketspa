@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-inventario", url = "http://localhost:8081/api/v1/msvc-inventario")
+@FeignClient(name = "msvc-sucursal", url = "http://localhost:8082/api/v1/sucursal")
 public interface SucursalClientRest {
     @GetMapping
     List<Sucursal> findAll();
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     Sucursal findByIdSucursal(@PathVariable Long id);
 }

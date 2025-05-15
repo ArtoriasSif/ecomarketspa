@@ -24,10 +24,10 @@ public class SucursalServicesImpl implements SucursalService {
     @Transactional
     @Override
     public Sucursal findByIdSucursal(Long id) {
-        return SucursalRepository.findById(id).orElseThrow(
-                ()-> new SucursalException("No se encontro la sucursal con id: " + id)
-        );
+        return SucursalRepository.findById(id)
+                .orElseThrow(() -> new SucursalException("No se encontro la sucursal con id: " + id ));
     }
+
 
     @Transactional
     @Override

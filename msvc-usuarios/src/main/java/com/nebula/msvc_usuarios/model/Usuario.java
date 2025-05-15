@@ -16,8 +16,8 @@ import lombok.*;
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "usuario_id",nullable = false)
-    private Long usuarioId;
+    @Column(name = "id_usuario",nullable = false)
+    private Long idUsuario;
 
     @Column(name="nombre_usuario",nullable = false,unique = true)
     @NotBlank(message = "El campo nombre de usuario no puede estar vacio.")
