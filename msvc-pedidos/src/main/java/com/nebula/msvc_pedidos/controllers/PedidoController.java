@@ -1,8 +1,7 @@
 package com.nebula.msvc_pedidos.controllers;
 
-import com.nebula.msvc_pedidos.dtos.PedidoRequestDTO;
+import com.nebula.msvc_pedidos.dtos.PedidoDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoResponseDTO;
-import com.nebula.msvc_pedidos.models.entitis.Pedido;
 import com.nebula.msvc_pedidos.services.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,8 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     @PostMapping
-    public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoRequestDTO pedidoDTO) {
+    public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
         PedidoResponseDTO response = pedidoService.save(pedidoDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 }
