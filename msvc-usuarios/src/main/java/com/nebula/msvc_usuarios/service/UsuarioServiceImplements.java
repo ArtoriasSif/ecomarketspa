@@ -35,7 +35,7 @@ public class UsuarioServiceImplements implements UsuarioService {
         if(usuarioRepository.findById(Id).isPresent()) {
             usuarioRepository.deleteById(Id);
         }else{
-            throw new UsuarioException("No se encontro el producto con id: " + Id);
+            throw new UsuarioException("No se encontro el usuario con id: " + Id);
         }
     }
 }
