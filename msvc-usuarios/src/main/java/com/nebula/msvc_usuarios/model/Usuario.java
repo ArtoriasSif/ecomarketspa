@@ -43,7 +43,7 @@ public class Usuario {
 
     @Column(name="direccion_usuario",nullable = false)
     @NotBlank(message = "El campo direccion no puede estar vacio.")
-    @Pattern(regexp = "([1-9][0-9]{0,3})\\s+[A-Za-zÁÉÍÓÚáéíóúñÑüÜ]+", message = "El campo direccion tiene que llevar el siguiente formato 'XXXX LETRAS'")
+    @Pattern(regexp = "([1-9][0-9]{0,3})\\s+([A-Za-zÁÉÍÓÚáéíóúñÑüÜ]+\\s*)+", message = "El campo direccion tiene que llevar el formato 'XXXX LETRAS'")
     private String direccionUsuario;
 
     @Column(name="telefono_usuario",nullable = false,unique = true)
