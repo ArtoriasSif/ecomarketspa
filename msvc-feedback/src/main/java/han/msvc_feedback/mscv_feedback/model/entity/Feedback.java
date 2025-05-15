@@ -36,4 +36,9 @@ public class Feedback {
     @Column(name="feedback_product",nullable = false)
     @NotNull(message = "El campo producto no puede estar vacio.")
     private Long productIdFeedback;
+
+    @PrePersist
+    public void prePersist() {
+        this.dateFeedback = LocalDateTime.now();
+    }
 }
