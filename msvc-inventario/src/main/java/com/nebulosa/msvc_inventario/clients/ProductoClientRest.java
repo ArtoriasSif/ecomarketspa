@@ -15,4 +15,6 @@ public interface ProductoClientRest {
 
     @GetMapping("/{id}")
     Product findByIdProducto(@PathVariable Long id);
+
+
 }

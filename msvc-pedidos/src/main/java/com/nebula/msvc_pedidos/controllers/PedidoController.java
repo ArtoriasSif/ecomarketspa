@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/v1/pedido")
@@ -23,6 +26,11 @@ public class PedidoController {
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
         PedidoResponseDTO response = pedidoService.save(pedidoDTO);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(201).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity <List<PedidoResponseDTO>> findAll() {
+        return ResponseEntity.status(200).body(pedidoService.findAll());
     }
 }

@@ -41,13 +41,13 @@ public class FeedbackServiceImplements implements FeedbackService{
         feedbackRepository.save(feedback);
         Usuario usuario = usuarioClientRest.findByIdUsuario(feedback.getUsuarioIdFeedback());
         Product product = productClientRest.findByIdProducto(feedback.getProductIdFeedback());
-        FeedbackResponseDTO feedbackResponseDTO = new FeedbackResponseDTO(
+        return new FeedbackResponseDTO(
                 feedback.getDateFeedback(),
                 feedback.getTextoFeedback(),
                 usuario.getNombreDelUsuario(),
                 product.getNombreProducto()
         );
-        return feedbackResponseDTO;
+
     }
 
     public Feedback findById(Long id) {

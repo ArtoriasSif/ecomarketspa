@@ -27,6 +27,14 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
+    public Inventory findById(Long id) {
+        return inventoryRepository.findById(id).orElseThrow(
+                () -> new InventoryException("No se encontro el inventario con id: " + id)
+        );
+    }
+
+    @Transactional
+    @Override
     public Inventory findByProductoAndSucursal(Long idProducto, Long idSucursal) {
         return inventoryRepository.findByIdProductoAndIdSucursal(idProducto, idSucursal)
                 .orElseThrow(() -> new InventoryException("No se encontró inventario con productoId " + idProducto + " y sucursalId " + idSucursal));
@@ -39,12 +47,13 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     @Override
     public Inventory save(Inventory inventory) {
+        //Validar que existe producto
         try {
             productoClientRest.findByIdProducto(inventory.getIdProducto());
         } catch (NotFound ex) {
             throw new InventoryException("No se encontró el producto con id: " + inventory.getIdProducto());
         }
-
+        //Validar que exite la sucursal
         try {
             sucursalClientRest.findByIdSucursal(inventory.getIdSucursal());
         } catch (NotFound ex) {
@@ -63,13 +72,13 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
-    public Inventory updateQuantity(Long inventoryId, Long quantity) {
+    public Inventory updateQuantity(Long inventoryId, Inventory inventory) {
         return  inventoryRepository.findById(inventoryId).map(i -> {
-            if (i.getCantidad() + quantity < 0) {
+            if (i.getCantidad() + inventory.getCantidad() < 0) {
                 throw new InventoryException("La cantidad a actualizar no puede ser negativa." +
                         " Cantidad actual: " + i.getCantidad());
             }
-            i.setCantidad(i.getCantidad() + quantity);
+            i.setCantidad(i.getCantidad() + inventory.getCantidad());
             return inventoryRepository.save(i);
         }).orElseThrow(
                 () -> new InventoryException("No se encontro el inventario con id: " + inventoryId)
@@ -80,7 +89,14 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public void deleteById(Long id) {
         if (inventoryRepository.findById(id).isPresent()) {
-            inventoryRepository.deleteById(id);
+            Inventory inventory = inventoryRepository.findById(id).get();
+            if(inventory.getCantidad() == 0){
+                inventoryRepository.deleteById(id);
+            }else {
+                throw new InventoryException("No se puede eliminar el inventario con id: " + id +
+                        " porque tiene el producto "+productoClientRest.findByIdProducto(inventory.getIdProducto()).getNombreProducto()+
+                        " una cantidad mayor a 0.");
+            }
         } else {
             throw new InventoryException("No se encontro el inventario con id: " + id);
         }

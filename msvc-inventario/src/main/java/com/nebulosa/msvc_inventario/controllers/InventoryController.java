@@ -15,11 +15,9 @@ import java.util.List;
 @RequestMapping("/api/v1/inventario")
 @Validated
 public class InventoryController {
-    //NO SE PUEDE PROBAR HASTA QUE TERMINEN MSVC-SUCURSAL
+
     @Autowired
     private InventoryService inventoryService;
-
-
 
     @GetMapping
     public ResponseEntity<Inventory> findByProductoAndSucursal(
@@ -50,10 +48,10 @@ public class InventoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Inventory> updateInventory(@PathVariable Long id, @Validated @RequestBody Inventory inventory){
+    public ResponseEntity<Inventory> updateInventoryQuantity(@PathVariable Long id,@Validated @RequestBody Inventory inventory){
         return ResponseEntity
                 .status(200)
-                .body(inventoryService.updateQuantity(id, inventory.getCantidad()));
+                .body(inventoryService.updateQuantity(id, inventory));
     }
 
     @DeleteMapping("/{id}")
