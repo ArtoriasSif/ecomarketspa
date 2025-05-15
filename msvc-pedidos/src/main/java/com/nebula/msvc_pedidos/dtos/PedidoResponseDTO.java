@@ -1,16 +1,25 @@
 package com.nebula.msvc_pedidos.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PedidoResponseDTO {
+
     private String nombreUsuario;
+    private String emailUsuario;
     private String nombreSucursal;
-    private List<ItemDetalleDTO> detalles;
-    private double total;
+    private String direccionSucursal;
+    private String provinciaSucursal;
+
+    private LocalDateTime fecha;
+    private Double totalPedido;
+
+    private List<ItemPedidoResponseDTO> productos;
 }

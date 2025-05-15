@@ -1,16 +1,17 @@
 package com.nebula.msvc_pedidos.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PedidoRequestDTO {
+@ToString
+public class PedidoDTO {
     private Long idUsuario;
     private Long idSucursal;
-    private List<ItemPedidoDTO> items;
+    private List<ItemProductoDTO> productos;
 }

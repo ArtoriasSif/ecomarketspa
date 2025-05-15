@@ -1,6 +1,7 @@
 package com.nebula.msvc_pedidos.models.entitis;
 
-import com.nebula.msvc_pedidos.dtos.ItemPedidoDTO;
+import com.nebula.msvc_pedidos.dtos.ItemPedidoResponseDTO;
+import com.nebula.msvc_pedidos.dtos.PedidoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,8 +35,6 @@ public class Pedido {
     @Column(name = "sucursal_id", nullable = false)
     private Long idSucursal; // ID de la sucursal desde msvc-sucursal
 
-    @Transient
-    private List<ItemPedidoDTO> items = new ArrayList<>();
 
 
 }

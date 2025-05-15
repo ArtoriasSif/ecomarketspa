@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class InventoryServiceImpl implements InventoryService {
 
@@ -28,6 +30,10 @@ public class InventoryServiceImpl implements InventoryService {
     public Inventory findByProductoAndSucursal(Long idProducto, Long idSucursal) {
         return inventoryRepository.findByIdProductoAndIdSucursal(idProducto, idSucursal)
                 .orElseThrow(() -> new InventoryException("No se encontró inventario con productoId " + idProducto + " y sucursalId " + idSucursal));
+    }
+
+    public List<Inventory> findByIdSucursal(Long idSucursal) {
+        return inventoryRepository.findByIdSucursal(idSucursal);
     }
 
     @Transactional

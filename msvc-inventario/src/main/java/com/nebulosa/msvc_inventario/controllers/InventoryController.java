@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/api/v1/inventario")
 @Validated
@@ -26,6 +28,15 @@ public class InventoryController {
     ) {
         Inventory inventario = inventoryService.findByProductoAndSucursal(idProducto, idSucursal);
         if (inventario == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(inventario);
+    }
+
+    @GetMapping("/sucursal/{idSucursal}")
+    public ResponseEntity<List<Inventory>> findByIdSucursal(@PathVariable Long idSucursal) {
+        List<Inventory> inventario = inventoryService.findByIdSucursal(idSucursal);
+        if (inventario.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(inventario);

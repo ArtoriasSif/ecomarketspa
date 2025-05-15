@@ -20,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PedidoServiceImpl implements PedidoService {
 
     @Autowired
     private PedidoRepositoty pedidoRepositoty;
-
     @Autowired
     private InventarioClientRest inventarioClientRest;
-
     @Autowired
     private UsuarioClientRest usuarioClientRest;
     @Autowired
@@ -37,76 +37,57 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private ProductoClientRest productoClientRest;
 
-    @Transactional
     @Override
-    public PedidoResponseDTO save(PedidoRequestDTO pedidoDTO) {
-
-        // 1. Validar y obtener usuario
-        Usuario usuario;
+    @Transactional
+    public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
+        //Validacion
         try {
-            usuario = usuarioClientRest.findByIdUsuario(pedidoDTO.getIdUsuario());
-        } catch (FeignException.NotFound ex) {
+            usuarioClientRest.findByIdUsuario(pedidoDTO.getIdUsuario());
+        }catch (FeignException ex){
             throw new PedidoException("No se encontró el usuario con id: " + pedidoDTO.getIdUsuario());
         }
-
-        // 2. Validar y obtener sucursal
-        Sucursal sucursal;
         try {
-            sucursal = sucursalClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
-        } catch (FeignException.NotFound ex) {
+            sucursalClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
+        }catch (FeignException ex){
             throw new PedidoException("No se encontró la sucursal con id: " + pedidoDTO.getIdSucursal());
         }
+        List<Inventario> inventarioSucursal = inventarioClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
+        Map<Long , Long> mapaInventario = inventarioSucursal.stream().collect(
+                Collectors.toMap(Inventario::getIdProducto, Inventario::getCantidad)
+        );
 
-        // 3. Procesar items
-        double total = 0.0;
-        List<ItemDetalleDTO> detalleList = new ArrayList<>();
-
-        for (ItemPedidoDTO item : pedidoDTO.getItems()) {
-
-            if (item.getIdProducto() == null) {
-                throw new PedidoException("El id del producto no puede ser null");
-            }
-
-            Producto producto;
-            try {
-                producto = productoClientRest.findByIdProducto(item.getIdProducto());
-            } catch (FeignException.NotFound ex) {
+        List<ItemPedidoResponseDTO> listaProductos = new ArrayList<>();
+        Double total = 0.0;
+        for (ItemProductoDTO item : pedidoDTO.getProductos()) {
+            if (!mapaInventario.containsKey(item.getIdProducto())){
                 throw new PedidoException("No se encontró el producto con id: " + item.getIdProducto());
             }
-
-            // Validar inventario
-            Inventario inventario = inventarioClientRest.findByIdProductoAndIdSucursal(
-                    item.getIdProducto(), pedidoDTO.getIdSucursal()
-            );
-
-            if (inventario == null || inventario.getCantidad() < item.getCantidad()) {
-                throw new PedidoException("No hay suficientes productos en inventario para el producto con id: " + item.getIdProducto());
+            if (mapaInventario.get(item.getIdProducto()) < item.getCantidad()){
+                throw new PedidoException("No hay suficientes existencias del producto con id: " + item.getIdProducto());
             }
 
-            // Calcular subtotal
-            double subtotal = producto.getPrecio() * item.getCantidad();
-            total += subtotal;
+            //Creacion de producto
+            Producto producto = productoClientRest.findByIdProducto(item.getIdProducto());
+            ItemPedidoResponseDTO itemPedido = new ItemPedidoResponseDTO(producto.getNombreProducto(),
+            producto.getPrecio(), item.getCantidad(), item.getCantidad() * producto.getPrecio() );
 
-            // Agregar a la lista de detalles
-            ItemDetalleDTO detalle = new ItemDetalleDTO();
-            detalle.setNombreProducto(producto.getNombreProducto());
-            detalle.setPrecioUnitario(producto.getPrecio());
-            detalle.setCantidad(item.getCantidad());
-            detalle.setSubtotal(subtotal);
-
-            detalleList.add(detalle);
+            total += item.getCantidad() * producto.getPrecio();
+            listaProductos.add(itemPedido);
         }
+        //Guardar pedido
+        LocalDateTime fecha = LocalDateTime.now();
+        Pedido pedido = new Pedido(null,fecha, total , pedidoDTO.getIdUsuario(), pedidoDTO.getIdSucursal());
+        pedidoRepositoty.save(pedido);
 
-        // 4. Guardar pedido en la base de datos si lo necesitas (opcional)
+        //Respoesta
 
-        // 5. Construir la respuesta
-        PedidoResponseDTO response = new PedidoResponseDTO();
-        response.setNombreUsuario(usuario.getNombreUsuario());
-        response.setNombreSucursal(sucursal.getNombreSucursal());
-        response.setDetalles(detalleList);
-        response.setTotal(total);
+        Usuario usuario = usuarioClientRest.findByIdUsuario(pedidoDTO.getIdUsuario());
+        Sucursal sucursal = sucursalClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
 
-        return response;
+        return new PedidoResponseDTO(usuario.getNombreUsuario(),
+                usuario.getCorreoUsuario(), sucursal.getNombreSucursal(), sucursal.getDireccionSucursal(),
+                sucursal.getProvinciaSucursal(),fecha, total , listaProductos );
+
     }
 }
 
