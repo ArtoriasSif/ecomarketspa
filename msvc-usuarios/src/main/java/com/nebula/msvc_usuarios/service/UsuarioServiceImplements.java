@@ -23,7 +23,7 @@ public class UsuarioServiceImplements implements UsuarioService {
     @Transactional
     @Override
     public Usuario save(Usuario usuario) {
-        if (usuario.getUsuarioId() != null && usuarioRepository.findById(usuario.getUsuarioId()).isPresent()) {
+        if (usuario.getIdUsuario() != null && usuarioRepository.findById(usuario.getIdUsuario()).isPresent()) {
             throw new UsuarioException("Usuario " +usuario.getNombreUsuario()+ " ya existente.");
         }
         return usuarioRepository.save(usuario);

@@ -15,14 +15,14 @@ public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "inventario_id")
-    private Long inventarioId;
+    @Column(name = "id_inventario")
+    private Long idInventario;
 
-    @Column(name = "producto_id", nullable = false)
-    private Long productoId;
+    @Column(name = "id_producto", nullable = false)
+    private Long idProducto; // ID del producto desde msvc-products
 
-    @Column(name = "sucursal_id", nullable = false)
-    private Long sucursalId;
+    @Column(name = "id_sucursal", nullable = false)
+    private Long idSucursal; // ID de la sucursal desde msvc-sucursal
 
     @Column(nullable = false)
     private Long cantidad;

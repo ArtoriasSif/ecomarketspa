@@ -40,9 +40,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public Product updatePrice(Long id, Long price){
+    public Product updatePrice(Long id, Double price){
         return productRepository.findById(id).map(p -> {
-            if (price < 0){
+            if (price < 0.0){
                 throw new ProductException("El precio no puede ser negativo");
             }
             p.setPrecio(price);
