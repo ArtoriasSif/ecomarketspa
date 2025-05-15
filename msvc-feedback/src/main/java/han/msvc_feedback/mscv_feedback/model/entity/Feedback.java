@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -22,7 +23,7 @@ public class Feedback {
     private Long feedbackId;
 
     @Column(name="feedback_fecha",nullable = false)
-    private Date dateFeedback;
+    private LocalDateTime dateFeedback;
 
     @Column(name="feedback_texto",nullable = false)
     @NotBlank(message = "El campo feedback no puede estar vacio.")
