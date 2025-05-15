@@ -28,7 +28,7 @@ public class FeedbackController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Feedback>> findAll() {
+    public ResponseEntity<List<FeedbackResponseDTO>> findAll() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(feedbackService.findAll());

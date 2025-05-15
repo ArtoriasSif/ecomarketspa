@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackServiceImplements implements FeedbackService{
@@ -41,10 +42,10 @@ public class FeedbackServiceImplements implements FeedbackService{
         Usuario usuario = usuarioClientRest.findByIdUsuario(feedback.getUsuarioIdFeedback());
         Product product = productClientRest.findByIdProducto(feedback.getProductIdFeedback());
         FeedbackResponseDTO feedbackResponseDTO = new FeedbackResponseDTO(
-        feedback.getDateFeedback(),
-        feedback.getTextoFeedback(),
-        usuario.getNombreDelUsuario(),
-        product.getNombreProducto()
+                feedback.getDateFeedback(),
+                feedback.getTextoFeedback(),
+                usuario.getNombreDelUsuario(),
+                product.getNombreProducto()
         );
         return feedbackResponseDTO;
     }
@@ -54,8 +55,21 @@ public class FeedbackServiceImplements implements FeedbackService{
                 () -> new FeedbackException("El feedback con ese id no existe."));
     }
 
-    public List<Feedback> findAll() {
-        return feedbackRepository.findAll();
+    public List<FeedbackResponseDTO> findAll() {
+        List<Feedback> feedbacks = feedbackRepository.findAll();
+
+        List<FeedbackResponseDTO> listaResponseDTO = feedbacks.stream().map(feedback -> {
+            Usuario usuario = usuarioClientRest.findByIdUsuario(feedback.getUsuarioIdFeedback());
+            Product producto = productClientRest.findByIdProducto(feedback.getProductIdFeedback());
+
+            return new FeedbackResponseDTO(
+                    feedback.getDateFeedback(),
+                    feedback.getTextoFeedback(),
+                    usuario.getNombreDelUsuario(),
+                    producto.getNombreProducto()
+            );
+        }).collect(Collectors.toList());
+        return listaResponseDTO;
     }
 
     public void deleteById(Long id) {

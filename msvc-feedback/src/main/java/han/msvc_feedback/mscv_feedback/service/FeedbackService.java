@@ -12,6 +12,6 @@ public interface FeedbackService {
 
     FeedbackResponseDTO save(Feedback feedback);
     Feedback findById(Long id);
-    List<Feedback> findAll();
+    List<FeedbackResponseDTO> findAll();
     void deleteById(Long id);
 }
