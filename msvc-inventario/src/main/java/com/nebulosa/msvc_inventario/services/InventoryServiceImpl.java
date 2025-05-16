@@ -35,6 +35,12 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
+    public List<Inventory> findAll() {
+        return inventoryRepository.findAll();
+    }
+
+    @Transactional
+    @Override
     public Inventory findByProductoAndSucursal(Long idProducto, Long idSucursal) {
         return inventoryRepository.findByIdProductoAndIdSucursal(idProducto, idSucursal)
                 .orElseThrow(() -> new InventoryException("No se encontró inventario con productoId " + idProducto + " y sucursalId " + idSucursal));

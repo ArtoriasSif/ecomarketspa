@@ -1,7 +1,8 @@
 package com.nebulosa.msvc_products.controllers;
 
+import com.nebulosa.msvc_products.dtos.PrecioUpdateDTO;
 import com.nebulosa.msvc_products.dtos.ProductoResponseDTO;
-import com.nebulosa.msvc_products.models.Product;
+import com.nebulosa.msvc_products.models.entities.Product;
 import com.nebulosa.msvc_products.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,15 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<ProductoResponseDTO>> getAllProductos(){
+    public ResponseEntity<List<Product>> getAllProducts(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(productService.findAll());
+    }
+
+
+    @GetMapping("/productoDTO")
+    public ResponseEntity<List<ProductoResponseDTO>> getAllProductosDTO(){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.findAllProductDTO());
@@ -49,10 +58,13 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProducto(@PathVariable Long id, @Validated @RequestBody Product producto){
+    public ResponseEntity<ProductoResponseDTO> updateProducto(
+            @PathVariable Long id,
+            @Validated @RequestBody PrecioUpdateDTO dto
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productService.updatePrice(id, producto.getPrecio()));
+                .body(productService.updatePrice(id, dto.getPrecio()));
     }
 
     @DeleteMapping("/{id}")
@@ -60,7 +72,7 @@ public class ProductController {
         try{
             productService.deleteByIdProducto(id);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body("Producto eliminado exitosamente");
+                    .body(productService.deleteByIdProducto(id));
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());

@@ -1,6 +1,6 @@
 package com.nebulosa.msvc_products.repositories;
 
-import com.nebulosa.msvc_products.models.Product;
+import com.nebulosa.msvc_products.models.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

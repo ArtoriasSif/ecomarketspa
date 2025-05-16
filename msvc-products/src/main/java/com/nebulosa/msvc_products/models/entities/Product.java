@@ -1,4 +1,4 @@
-package com.nebulosa.msvc_products.models;
+package com.nebulosa.msvc_products.models.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

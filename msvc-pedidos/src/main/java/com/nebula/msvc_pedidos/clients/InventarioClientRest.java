@@ -23,7 +23,6 @@ public interface InventarioClientRest {
             @RequestParam("idSucursal") Long idSucursal
     );
 
-
     @PutMapping("/{id}")
     Inventario updateInventoryQuantity(@PathVariable("id") Long id, @RequestParam("quantity") Long quantity);
 }

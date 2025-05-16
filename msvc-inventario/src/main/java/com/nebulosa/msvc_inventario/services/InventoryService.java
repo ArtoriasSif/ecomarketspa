@@ -8,6 +8,7 @@ import java.util.List;
 public interface InventoryService {
 
     Inventory findById(Long id);
+    List<Inventory> findAll();
     Inventory save (Inventory inventory);
     Inventory updateQuantity(Long idInventory , Inventory inventory);
     void deleteById(Long id);

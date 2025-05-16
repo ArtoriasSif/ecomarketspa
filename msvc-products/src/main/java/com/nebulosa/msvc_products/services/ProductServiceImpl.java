@@ -1,8 +1,10 @@
 package com.nebulosa.msvc_products.services;
 
+import com.nebulosa.msvc_products.clients.InventarioClientRest;
 import com.nebulosa.msvc_products.dtos.ProductoResponseDTO;
 import com.nebulosa.msvc_products.exceptions.ProductException;
-import com.nebulosa.msvc_products.models.Product;
+import com.nebulosa.msvc_products.models.Inventario;
+import com.nebulosa.msvc_products.models.entities.Product;
 import com.nebulosa.msvc_products.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,6 +20,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private InventarioClientRest inventarioClientRest;
 
     @Transactional(readOnly = true)
     @Override
@@ -38,7 +44,6 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
-
     @Transactional(readOnly = true)
     @Override
     public Product findByIdProducto(Long id){
@@ -54,7 +59,6 @@ public class ProductServiceImpl implements ProductService {
                 ()-> new ProductException("Producto con el nombre "+nombre+" no encontrado")
         );
     }
-
 
     @Transactional(readOnly = true)
     @Override
@@ -80,25 +84,49 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public Product updatePrice(Long id, Double price){
+    public ProductoResponseDTO updatePrice(Long id, Double price) {
         return productRepository.findById(id).map(p -> {
-            if (price < 0.0){
+            if (price < 0.0) {
                 throw new ProductException("El precio no puede ser negativo");
             }
             p.setPrecio(price);
-            return productRepository.save(p);
+            productRepository.save(p);
+            return new ProductoResponseDTO(
+                    "Precio del producto con id: " + p.getIdProducto() + " actualizado exitosamente",
+                    price,
+                    p.getNombreProducto()
+            );
         }).orElseThrow(
                 () -> new ProductException("No se encontro el producto con id: " + id)
         );
+
     }
 
     @Transactional
     @Override
-    public void deleteByIdProducto(Long id){
-        if (productRepository.findById(id).isPresent()){
+    //Deletar el producto validando que no exista ningun inventario con ese producto
+    public String deleteByIdProducto(Long id) {
+        return productRepository.findById(id).map(producto -> {
+
+            List<Inventario> inventarios = inventarioClientRest.findAll();
+
+            Optional<Inventario> inventarioConStock = inventarios.stream()
+                    .filter(i -> i.getIdProducto().equals(id) && i.getCantidad() > 0)
+                    .findFirst();
+
+            if (inventarioConStock.isPresent()) {
+                Inventario i = inventarioConStock.get();
+                throw new ProductException("No se puede eliminar el producto con id: " + id +
+                        " porque tiene el inventario con id: " + i.getIdInventario() +
+                        " con cantidad: " + i.getCantidad());
+            }
+
             productRepository.deleteById(id);
-        }else{
-            throw new ProductException("No se encontro el producto con id: " + id);
-        }
+            return "Producto " + producto.getNombreProducto() + " eliminado exitosamente";
+
+        }).orElseThrow(() -> new ProductException("No se encontró el producto con id: " + id));
     }
 }
+
+
+

@@ -19,7 +19,7 @@ public class InventoryController {
     @Autowired
     private InventoryService inventoryService;
 
-    @GetMapping
+    /*@GetMapping
     public ResponseEntity<Inventory> findByProductoAndSucursal(
             @RequestParam Long idProducto,
             @RequestParam Long idSucursal
@@ -29,6 +29,11 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(inventario);
+    }*/
+
+    @GetMapping
+    public ResponseEntity<List<Inventory>> findAll() {
+        return ResponseEntity.ok(inventoryService.findAll());
     }
 
     @GetMapping("/sucursal/{idSucursal}")
