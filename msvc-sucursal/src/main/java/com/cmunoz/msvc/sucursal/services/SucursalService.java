@@ -9,7 +9,7 @@ public interface SucursalService {
     List<Sucursal> findAllSucursal();
     Sucursal findByNombreSucursal(String nombreSucursal);
     Sucursal findByIdSucursal(Long id);
-    Sucursal save(Sucursal sucursal);
+    String save(Sucursal sucursal);
     void deleteByIdSucursal(Long id);
 
 }

@@ -18,6 +18,7 @@ import java.util.List;
 @Validated
 public class SucursalController {
 
+    //Falta agregar PUT
     @Autowired
     private SucursalService sucursalService;
 
@@ -42,7 +43,7 @@ public class SucursalController {
     }
 
     @PostMapping()
-    public ResponseEntity<Sucursal> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
+    public ResponseEntity<String> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
                 .status(201)
                 .body(sucursalService.save(sucursal));
