@@ -60,7 +60,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteInventory(@PathVariable Long id){
+    public ResponseEntity<String> deleteInventoryById(@PathVariable Long id){
         try{
             inventoryService.deleteById(id);
             return ResponseEntity.status(200)

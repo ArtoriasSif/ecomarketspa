@@ -28,26 +28,17 @@ public class ProductController {
                 .body(productService.findAll());
     }
 
-
-    @GetMapping("/productoDTO")
-    public ResponseEntity<List<ProductoResponseDTO>> getAllProductosDTO(){
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductoById(@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productService.findAllProductDTO());
+                .body(productService.findByIdProducto(id));
     }
 
     @GetMapping("/nombre/{nombre}")
     public ResponseEntity<Product> getProductosByNombre(@PathVariable String nombre){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(productService.findByNombreProducto(nombre));
-    }
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductoById(@PathVariable Long id){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.findByIdProducto(id));
     }
 
     @PostMapping
@@ -58,7 +49,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> updateProducto(
+    public ResponseEntity<ProductoResponseDTO> updatePrecioProducto(
             @PathVariable Long id,
             @Validated @RequestBody PrecioUpdateDTO dto
     ) {
@@ -70,7 +61,6 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProducto(@PathVariable Long id){
         try{
-            productService.deleteByIdProducto(id);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(productService.deleteByIdProducto(id));
         } catch (Exception ex){
@@ -78,4 +68,13 @@ public class ProductController {
                     .body(ex.getMessage());
         }
     }
+
+    //Endpoint de las clases clients en otros msvc ??
+    @GetMapping("/productoDTO")
+    public ResponseEntity<List<ProductoResponseDTO>> getAllProductosDTO(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(productService.findAllProductDTO());
+    }
+
 }

@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         return new ProductoResponseDTO(
-                "Producto del codigo : "+ product.getIdProducto()+" agregado exitosamente",
+                "Producto del código : "+ product.getIdProducto()+" registrado exitosamente",
                 product.getPrecio(),
                 product.getNombreProducto()
         );
@@ -89,6 +89,9 @@ public class ProductServiceImpl implements ProductService {
             if (price < 0.0) {
                 throw new ProductException("El precio no puede ser negativo");
             }
+            if (price.equals(p.getPrecio())) {
+                throw new ProductException("El precio no ha cambiado");
+            }
             p.setPrecio(price);
             productRepository.save(p);
             return new ProductoResponseDTO(
@@ -97,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
                     p.getNombreProducto()
             );
         }).orElseThrow(
-                () -> new ProductException("No se encontro el producto con id: " + id)
+                () -> new ProductException("No se encontró el producto con id: " + id)
         );
 
     }
@@ -106,26 +109,30 @@ public class ProductServiceImpl implements ProductService {
     @Override
     //Deletar el producto validando que no exista ningun inventario con ese producto
     public String deleteByIdProducto(Long id) {
-        return productRepository.findById(id).map(producto -> {
+        Product producto = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("No se encontró el producto con id: " + id));
 
-            List<Inventario> inventarios = inventarioClientRest.findAll();
-
-            Optional<Inventario> inventarioConStock = inventarios.stream()
-                    .filter(i -> i.getIdProducto().equals(id) && i.getCantidad() > 0)
-                    .findFirst();
-
-            if (inventarioConStock.isPresent()) {
-                Inventario i = inventarioConStock.get();
-                throw new ProductException("No se puede eliminar el producto con id: " + id +
-                        " porque tiene el inventario con id: " + i.getIdInventario() +
-                        " con cantidad: " + i.getCantidad());
+        List<Inventario> inventarios = inventarioClientRest.findAll();
+        if (inventarios != null) {
+            for (Inventario i : inventarios) {
+                if (i != null && id.equals(i.getIdProducto()) && i.getCantidad() > 0) {
+                    throw new ProductException("No se puede eliminar el producto con id: " + id +
+                            " porque tiene el inventario con id: " + i.getIdInventario() +
+                            " con cantidad: " + i.getCantidad());
+                }
+                if (i != null && id.equals(i.getIdProducto()) && i.getCantidad() == 0) {
+                    //Eliminar producto e inventario
+                    inventarioClientRest.deleteInventoryById(i.getIdInventario());
+                    productRepository.deleteById(id);
+                    return "Producto " + producto.getNombreProducto() + " junto con el inventario" +
+                            " con id: " + i.getIdInventario() + " eliminado correctamente";
+                }
             }
-
-            productRepository.deleteById(id);
-            return "Producto " + producto.getNombreProducto() + " eliminado exitosamente";
-
-        }).orElseThrow(() -> new ProductException("No se encontró el producto con id: " + id));
+        }
+        productRepository.deleteById(id);
+        return "Producto " + producto.getNombreProducto() + " eliminado correctamente";
     }
+
 }
 
 
