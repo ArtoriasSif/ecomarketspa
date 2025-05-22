@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @FeignClient(name = "msvc-inventario", url = "http://localhost:8081/api/v1/inventario")
@@ -16,4 +17,7 @@ public interface InventarioClientRest {
 
     @DeleteMapping("/{id}")
     void deleteInventoryById(@PathVariable Long id);
+
+    @DeleteMapping("/all")
+    void deleteAll(ArrayList<Inventario> inventariosEliminados);
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -111,8 +112,10 @@ public class ProductServiceImpl implements ProductService {
     public String deleteByIdProducto(Long id) {
         Product producto = productRepository.findById(id)
                 .orElseThrow(() -> new ProductException("No se encontró el producto con id: " + id));
-
         List<Inventario> inventarios = inventarioClientRest.findAll();
+        ArrayList<String> mensajes = new ArrayList<>();
+        ArrayList<Inventario> inventariosEliminados = new ArrayList<>();
+        //for para verificar si el producto tiene stock en algun inventario
         if (inventarios != null) {
             for (Inventario i : inventarios) {
                 if (i != null && id.equals(i.getIdProducto()) && i.getCantidad() > 0) {
@@ -122,15 +125,20 @@ public class ProductServiceImpl implements ProductService {
                 }
                 if (i != null && id.equals(i.getIdProducto()) && i.getCantidad() == 0) {
                     //Eliminar producto e inventario
-                    inventarioClientRest.deleteInventoryById(i.getIdInventario());
-                    productRepository.deleteById(id);
-                    return "Producto " + producto.getNombreProducto() + " junto con el inventario" +
-                            " con id: " + i.getIdInventario() + " eliminado correctamente";
+                    inventariosEliminados.add(i);
                 }
             }
+            //for para eliminar los inventarios relacionado al producto para evitar conflito.
+            for (Inventario i : inventariosEliminados) {
+                inventarioClientRest.deleteInventoryById(i.getIdInventario());
+                mensajes.add("El inventario con id: " + i.getIdInventario() + " " +
+                        "que esta relacionado con el producto " + producto.getNombreProducto() +
+                        " ha sido eliminado.");
+            }
         }
+        mensajes.add("El producto con id: " + id + " ha sido eliminado correctamente.");
         productRepository.deleteById(id);
-        return "Producto " + producto.getNombreProducto() + " eliminado correctamente";
+        return mensajes.stream().collect(Collectors.joining("\n"));
     }
 
 }

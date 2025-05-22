@@ -70,4 +70,5 @@ public class InventoryController {
                     .body(ex.getMessage());
         }
     }
+
 }
