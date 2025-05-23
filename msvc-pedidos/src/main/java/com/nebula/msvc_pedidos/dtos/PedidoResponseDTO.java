@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 public class PedidoResponseDTO {
 
-    private String nombreUsuario;
+    private String nombreCliente;
     private String emailUsuario;
     private String nombreSucursal;
     private String direccionSucursal;

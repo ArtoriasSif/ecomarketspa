@@ -2,12 +2,10 @@ package com.nebula.msvc_pedidos.clients;
 
 
 
+import com.nebula.msvc_pedidos.dtos.QuantityUpdateDTO;
 import com.nebula.msvc_pedidos.models.Inventario;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,12 +15,7 @@ public interface InventarioClientRest {
     @GetMapping("/sucursal/{idSucursal}")
     List<Inventario> findByIdSucursal(@PathVariable("idSucursal") Long idSucursal);
 
-    @GetMapping
-    Inventario findByIdProductoAndIdSucursal(
-            @RequestParam("IdProducto") Long idProducto,
-            @RequestParam("idSucursal") Long idSucursal
-    );
 
-    @PutMapping("/{id}")
-    Inventario updateInventoryQuantity(@PathVariable("id") Long id, @RequestParam("quantity") Long quantity);
+    @PutMapping("/actualizar")
+    void updateQuantity(@RequestBody QuantityUpdateDTO dto);
 }

@@ -1,6 +1,7 @@
 package com.nebulosa.msvc_inventario.controllers;
 
 
+import com.nebulosa.msvc_inventario.dtos.QuantityUpdateDTO;
 import com.nebulosa.msvc_inventario.models.entities.Inventory;
 import com.nebulosa.msvc_inventario.services.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class InventoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Inventory> findByIdInvetory(@PathVariable Long id) {
-        return ResponseEntity.ok(inventoryService.findByIdInvetory(id));
+    public ResponseEntity<Inventory> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(inventoryService.findById(id));
     }
 
 
@@ -46,11 +47,10 @@ public class InventoryController {
                 .body(inventoryService.save(inventory));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Inventory> updateInventoryQuantity(@PathVariable Long id,@Validated @RequestBody Inventory inventory){
+    @PutMapping("/actualizar")
+    public ResponseEntity<?> updateQuantity(@RequestBody QuantityUpdateDTO dto ){
         return ResponseEntity
-                .status(200)
-                .body(inventoryService.updateQuantity(id, inventory));
+                .ok(inventoryService.updateQuantity(dto.getProductoId(), dto.getSucursalId(), dto.getCantidad()));
     }
 
     @DeleteMapping("/{id}")

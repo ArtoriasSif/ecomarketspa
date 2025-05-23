@@ -76,8 +76,9 @@ public class PedidoServiceImpl implements PedidoService {
             if (inventario.getCantidad() < item.getCantidad()) {
                 throw new PedidoException("No hay suficientes producto con id: " + item.getIdProducto()) ;
             }
-            // Descontar inventario usando inventario.getIdInventario()
-            inventarioClientRest.updateInventoryQuantity(inventario.getIdInventario(), item.getCantidad());
+            // Descontar inventario usando DTO (cantidad negativa)
+            QuantityUpdateDTO dto = new QuantityUpdateDTO(item.getIdProducto(), pedidoDTO.getIdSucursal(), -item.getCantidad());
+            inventarioClientRest.updateQuantity(dto);
 
             //Creacion de producto y guardado del pedidoResponse
             Producto producto = productoClientRest.findByIdProducto(item.getIdProducto());

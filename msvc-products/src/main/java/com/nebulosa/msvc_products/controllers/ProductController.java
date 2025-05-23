@@ -29,7 +29,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductoById(@PathVariable Long id){
+    public ResponseEntity<Product> findByIdProducto(@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.findByIdProducto(id));

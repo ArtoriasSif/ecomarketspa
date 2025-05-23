@@ -35,7 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
-    public Inventory findByIdInvetory (Long id){
+    public Inventory findById (Long id){
         return inventoryRepository.findById(id).orElseThrow(
                 () -> new InventoryException("No se encontró el inventario con id: " + id)
         );
@@ -73,17 +73,24 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
-    public Inventory updateQuantity(Long inventoryId, Inventory inventory) {
-        return  inventoryRepository.findById(inventoryId).map(i -> {
-            if (i.getCantidad() + inventory.getCantidad() < 0) {
-                throw new InventoryException("La cantidad a actualizar no puede ser negativa." +
-                        " Cantidad actual: " + i.getCantidad());
-            }
-            i.setCantidad(i.getCantidad() + inventory.getCantidad());
-            return inventoryRepository.save(i);
-        }).orElseThrow(
-                () -> new InventoryException("No se encontró el inventario con id: " + inventoryId)
-        );
+    public Inventory findByIdProductoAndIdSucursal(Long productoId, Long sucursalId) {
+        return inventoryRepository.findByIdProductoAndIdSucursal(productoId, sucursalId)
+                .orElseThrow(() -> new InventoryException("No se encontró inventario para el producto "
+                        + productoId + " en la sucursal " + sucursalId));
+    }
+
+    @Transactional
+    @Override
+    public Inventory updateQuantity(Long productoId, Long sucursalId, Long quantity) {
+        Inventory i = inventoryRepository.findByIdProductoAndIdSucursal(productoId, sucursalId)
+                .orElseThrow(() -> new InventoryException("Inventario no encontrado."));
+
+        if (i.getCantidad() + quantity < 0) {
+            throw new InventoryException("La cantidad a actualizar no puede ser negativa. Cantidad actual: " + i.getCantidad());
+        }
+
+        i.setCantidad(i.getCantidad() + quantity);
+        return inventoryRepository.save(i);
     }
 
     @Transactional
