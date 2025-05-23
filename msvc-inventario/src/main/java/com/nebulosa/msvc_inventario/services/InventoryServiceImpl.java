@@ -25,13 +25,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Autowired
     private SucursalClientRest sucursalClientRest;
 
-    @Transactional
-    @Override
-    public Inventory findById(Long id) {
-        return inventoryRepository.findById(id).orElseThrow(
-                () -> new InventoryException("No se encontro el inventario con id: " + id)
-        );
-    }
+
 
     @Transactional
     @Override
@@ -41,9 +35,10 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
-    public Inventory findByProductoAndSucursal(Long idProducto, Long idSucursal) {
-        return inventoryRepository.findByIdProductoAndIdSucursal(idProducto, idSucursal)
-                .orElseThrow(() -> new InventoryException("No se encontró inventario con productoId " + idProducto + " y sucursalId " + idSucursal));
+    public Inventory findByIdInvetory (Long id){
+        return inventoryRepository.findById(id).orElseThrow(
+                () -> new InventoryException("No se encontró el inventario con id: " + id)
+        );
     }
 
     public List<Inventory> findByIdSucursal(Long idSucursal) {
@@ -87,7 +82,7 @@ public class InventoryServiceImpl implements InventoryService {
             i.setCantidad(i.getCantidad() + inventory.getCantidad());
             return inventoryRepository.save(i);
         }).orElseThrow(
-                () -> new InventoryException("No se encontro el inventario con id: " + inventoryId)
+                () -> new InventoryException("No se encontró el inventario con id: " + inventoryId)
         );
     }
 
@@ -101,10 +96,10 @@ public class InventoryServiceImpl implements InventoryService {
             }else {
                 throw new InventoryException("No se puede eliminar el inventario con id: " + id +
                         " porque tiene el producto "+productoClientRest.findByIdProducto(inventory.getIdProducto()).getNombreProducto()+
-                        " una cantidad mayor a 0.");
+                        " una cantidad mayor que 0. ");
             }
         } else {
-            throw new InventoryException("No se encontro el inventario con id: " + id);
+            throw new InventoryException("No se encontró el inventario con id: " + id);
         }
     }
 }
