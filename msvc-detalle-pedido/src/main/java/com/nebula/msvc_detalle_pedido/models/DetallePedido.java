@@ -1,4 +1,4 @@
-package com.nebula.msvc_detalle_pedido.model;
+package com.nebula.msvc_detalle_pedido.models;
 
 
 import jakarta.persistence.*;
@@ -15,11 +15,18 @@ public class DetallePedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_detalle_pedido",nullable = false)
     private Long idDetallePedido;
 
+    @Column(name = "id_pedido",nullable = false)
     private Long idPedido;
 
+    @Column(name = "id_producto",nullable = false)
     private Long idProducto;
 
-    private Double cantidad;
+    @Column(nullable = false)
+    private Long cantidad;
+
+    @Column(nullable = false)
+    private Double total;
 }

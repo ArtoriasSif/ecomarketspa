@@ -62,7 +62,7 @@ public class PedidoServiceImpl implements PedidoService {
                 Collectors.toMap(Inventario::getIdProducto, Function.identity())
         );
         //Lista de respuesta al postman
-        List<ItemPedidoResponseDTO> listaProductos = new ArrayList<>();
+        List<ItemPedidoResponseDTO> listaProductos = new ArrayList<>(); //REMOVER POR MSVC-DETALLE
         Double total = 0.0;
         //Validar lista de la existencia de productos y cantidades enviados por posman
                                     //Lista de idProducto y cantidad de postman
