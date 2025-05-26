@@ -41,6 +41,14 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private ProductoClientRest productoClientRest;
 
+    @Autowired
+    @Transactional
+    public Pedido findById(Long id) {
+        return pedidoRepositoty.findById(id).orElseThrow(
+                () -> new PedidoException("Pedido no encontrado")
+        );
+    }
+
     @Override
     @Transactional
     public PedidoResponseDTO save(PedidoDTO pedidoDTO) {

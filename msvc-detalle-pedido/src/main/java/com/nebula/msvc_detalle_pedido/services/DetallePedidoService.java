@@ -1,8 +1,10 @@
 package com.nebula.msvc_detalle_pedido.services;
 
 
-import com.nebula.msvc_detalle_pedido.models.DetallePedido;
+import com.nebula.msvc_detalle_pedido.models.entities.DetallePedido;
+
+import java.util.List;
 
 public interface DetallePedidoService {
-    DetallePedido save(DetallePedido detallePedido);
+    List<DetallePedido> save(DetallePedido detallePedido);
 }

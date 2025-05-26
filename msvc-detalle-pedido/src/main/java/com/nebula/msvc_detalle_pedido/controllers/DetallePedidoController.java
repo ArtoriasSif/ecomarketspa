@@ -1,7 +1,6 @@
 package com.nebula.msvc_detalle_pedido.controllers;
 
-import com.nebula.msvc_detalle_pedido.models.DetallePedido;
-import com.nebula.msvc_detalle_pedido.repositories.DetallePedidoRepository;
+import com.nebula.msvc_detalle_pedido.models.entities.DetallePedido;
 import com.nebula.msvc_detalle_pedido.services.DetallePedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +9,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/v1/detalle-pedido")
@@ -20,8 +21,8 @@ public class DetallePedidoController {
     DetallePedidoService detallePedidoService;
 
     @PostMapping
-    public ResponseEntity<DetallePedido> save (@ResponseBody DetallePedido detallePedido){
-        DetallePedido datelles = detallePedidoService.save(detallePedido);
+    public ResponseEntity <List<DetallePedido>> save (@ResponseBody List<DetallePedido> detallePedidos){
+        List<DetallePedido> datelles = detallePedidoService.save(detallePedidos);
         return ResponseEntity.status(201).body(datelles);
     }
 

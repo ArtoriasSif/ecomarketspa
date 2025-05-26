@@ -1,4 +1,4 @@
-package com.nebula.msvc_detalle_pedido.models;
+package com.nebula.msvc_detalle_pedido.models.entities;
 
 
 import jakarta.persistence.*;

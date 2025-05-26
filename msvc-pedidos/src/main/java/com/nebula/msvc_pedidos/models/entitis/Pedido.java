@@ -35,8 +35,5 @@ public class Pedido {
     @Column(name = "sucursal_id", nullable = false)
     private Long idSucursal; // ID de la sucursal desde msvc-sucursal
 
-    @Column(name = "detalle_productos", columnDefinition = "TEXT", nullable = false)
-    private String detalleProductos;
-
 
 }
