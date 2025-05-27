@@ -1,5 +1,6 @@
 package com.nebula.msvc_detalle_pedido.clients;
 
+import com.nebula.msvc_detalle_pedido.models.Producto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

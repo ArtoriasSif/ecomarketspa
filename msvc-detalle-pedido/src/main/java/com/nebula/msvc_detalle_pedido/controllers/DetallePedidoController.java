@@ -6,22 +6,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/v1/detalle-pedido")
+@RequestMapping("/api/v1/detalle")
 @Validated
 public class DetallePedidoController {
 
     @Autowired
     DetallePedidoService detallePedidoService;
 
+    @GetMapping("/{idPedido}")
+    public ResponseEntity<List<DetallePedido>> findByIdPedido(@PathVariable Long idPedido) {
+        List<DetallePedido> detalles = detallePedidoService.findByIdPedido(idPedido);
+        if (detalles.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(detalles);
+    }
+
     @PostMapping
-    public ResponseEntity <List<DetallePedido>> save (@ResponseBody List<DetallePedido> detallePedidos){
+    public ResponseEntity <List<DetallePedido>> save (@RequestBody List<DetallePedido> detallePedidos){
         List<DetallePedido> datelles = detallePedidoService.save(detallePedidos);
         return ResponseEntity.status(201).body(datelles);
     }

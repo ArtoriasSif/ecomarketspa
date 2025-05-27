@@ -28,5 +28,5 @@ public class DetallePedido {
     private Long cantidad;
 
     @Column(nullable = false)
-    private Double total;
+    private Double subTotal;
 }

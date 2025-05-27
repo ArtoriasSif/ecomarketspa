@@ -1,4 +1,4 @@
-package com.nebula.msvc_pedidos.dtos;
+package com.nebula.msvc_detalle_pedido.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

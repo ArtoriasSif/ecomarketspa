@@ -1,13 +1,9 @@
 package com.nebula.msvc_pedidos.models.entitis;
 
-import com.nebula.msvc_pedidos.dtos.ItemPedidoResponseDTO;
-import com.nebula.msvc_pedidos.dtos.PedidoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name ="pedidos")
@@ -25,9 +21,6 @@ public class Pedido {
 
     @Column(name = "fecha_pedido", nullable = false)
     private LocalDateTime fechaPedido;
-
-    @Column(name = "total_pedido", nullable = false)
-    private Double totalPedido;
 
     @Column(name = "id_usuario", nullable = false)
     private Long idUsuario; // ID del usuario desde msvc-usuario

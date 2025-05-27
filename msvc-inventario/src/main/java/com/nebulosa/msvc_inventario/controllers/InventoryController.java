@@ -34,9 +34,7 @@ public class InventoryController {
     @GetMapping("/sucursal/{idSucursal}")
     public ResponseEntity<List<Inventory>> findByIdSucursal(@PathVariable Long idSucursal) {
         List<Inventory> inventario = inventoryService.findByIdSucursal(idSucursal);
-        if (inventario.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        // No retornar 404 si la lista está vacía
         return ResponseEntity.ok(inventario);
     }
 
@@ -64,5 +62,4 @@ public class InventoryController {
                     .body(ex.getMessage());
         }
     }
-
 }

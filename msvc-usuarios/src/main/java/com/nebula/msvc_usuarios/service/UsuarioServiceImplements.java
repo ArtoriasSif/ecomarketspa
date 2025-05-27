@@ -7,6 +7,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UsuarioServiceImplements implements UsuarioService {
 
@@ -18,6 +20,12 @@ public class UsuarioServiceImplements implements UsuarioService {
     public Usuario findById(Long Id) {
         return usuarioRepository.findById(Id).orElseThrow(
                 () -> new UsuarioException("Usuario no encontrado.") );
+    }
+
+    @Transactional
+    @Override
+    public List<Usuario> findAll () {
+        return usuarioRepository.findAll() ;
     }
 
     @Transactional

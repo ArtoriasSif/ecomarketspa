@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/api/v1/usuarios")
 @Validated
@@ -24,6 +26,11 @@ public class UsuarioController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(usuarioService.findById(id));
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<Usuario>> findAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(usuarioService.findAll());
     }
 
     @PostMapping()
