@@ -27,4 +27,9 @@ public class Product {
     @NotNull(message = "El campo precio no puede ser vacio")
     private Double precio;
 
+
+    public Product(String nombreProducto, String precioProducto) {
+        this.nombreProducto = nombreProducto;
+        this.precio = Double.valueOf(precioProducto);
+    }
 }
