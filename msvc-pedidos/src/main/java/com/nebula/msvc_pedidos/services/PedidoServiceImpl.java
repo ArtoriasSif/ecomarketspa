@@ -83,5 +83,19 @@ public class PedidoServiceImpl implements PedidoService {
                 detalles,
                 total);
     }
+
+    @Transactional
+    @Override
+    public String deletePedidoId(Long id){
+        Pedido pedido = pedidoRepositoty.findById(id).orElseThrow(
+                () -> new PedidoException("Pedido no encontrado")
+        );
+        //Deletar detalles
+        detallePedidoClientRest.deleteByIdPedido(pedido.getIdPedido());
+
+        pedidoRepositoty.delete(pedido);
+
+        return "El pedido con su detalle fue eliminado exitosamente";
+    }
 }
 

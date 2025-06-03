@@ -88,4 +88,16 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
         return detallePedidoRepository.findByIdPedido(idPedido);
     }
 
+    @Transactional
+    @Override
+    public void deleteDetallePedido (Long idPedido){
+        List<DetallePedido> detallePedidos = detallePedidoRepository.findByIdPedido(idPedido);
+
+        if (detallePedidos == null || detallePedidos.isEmpty()) {
+            throw new DetallePedidosException("No hay productos en la lista de detalles para eliminar");
+        }
+        detallePedidoRepository.deleteAll(detallePedidos);
+
+    }
+
 }

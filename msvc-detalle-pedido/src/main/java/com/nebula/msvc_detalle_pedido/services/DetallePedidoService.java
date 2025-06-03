@@ -8,4 +8,5 @@ import java.util.List;
 public interface DetallePedidoService {
     List<DetallePedido> save(List<DetallePedido> detallePedido);
     List<DetallePedido> findByIdPedido(Long idPedido);
+    void deleteDetallePedido (Long idPedido);
 }

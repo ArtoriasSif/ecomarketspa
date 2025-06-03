@@ -51,5 +51,16 @@ public class PedidoController {
         }
     }
 
+    //Determinado como ? dado que en Usuario se ucupara un metodo VOID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        try{
+            String mensaje = pedidoService.deletePedidoId(id);
+            return ResponseEntity.status(200).body(mensaje);
+        }catch (Exception ex){
+            return ResponseEntity.status(404).body(ex.getMessage());
+        }
+    }
+
 
 }

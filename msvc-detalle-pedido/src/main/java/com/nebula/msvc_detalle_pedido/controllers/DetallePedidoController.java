@@ -33,4 +33,15 @@ public class DetallePedidoController {
         return ResponseEntity.status(201).body(datelles);
     }
 
+
+    @DeleteMapping("/{idPedido}")
+    public ResponseEntity<Void> delete (@PathVariable Long idPedido) {
+        try{
+            detallePedidoService.deleteDetallePedido(idPedido);
+            return ResponseEntity.noContent().build();
+        }catch (Exception ex){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

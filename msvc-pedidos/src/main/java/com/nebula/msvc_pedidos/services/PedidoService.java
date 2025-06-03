@@ -11,4 +11,5 @@ public interface PedidoService {
     PedidoResponseDTO save(PedidoDTO pedidoDTO);
     Pedido findById(Long id);
     PedidoConDetalleDTO findPedidoConDetalles(Long idPedido);
+    String deletePedidoId(Long id);
 }
