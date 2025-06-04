@@ -57,4 +57,18 @@ public class SucursalServicesImpl implements SucursalService {
             throw new SucursalException ("No se encontro la sucursal con id: " + id);
         }
     }
+
+    @Transactional
+    @Override
+    public String updateByIdSucursal(Long id, Sucursal sucursal) {
+        if(!SucursalRepository.findById(id).isPresent()){
+            throw new SucursalException("No se encontro la sucursal con id: " + id);
+        }
+        Sucursal sucursalUpdate = SucursalRepository.findById(id).get();
+        sucursalUpdate.setNombreSucursal(sucursal.getNombreSucursal());
+        sucursalUpdate.setDireccionSucursal(sucursal.getDireccionSucursal());
+        sucursalUpdate.setTelefonoSucursal(sucursal.getTelefonoSucursal());
+        SucursalRepository.save(sucursalUpdate);
+        return "La sucursal con id: " + id + " se actualizo exitosamente";
+    }
 }
