@@ -50,9 +50,10 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public void deleteByIdSucursal(Long id) {
+    public String deleteByIdSucursal(Long id) {
         if(SucursalRepository.findById(id).isPresent()) {
             SucursalRepository.deleteById(id);
+            return "La sucursal con id: " + id + " se elimino exitosamente";
         }else{
             throw new SucursalException ("No se encontro la sucursal con id: " + id);
         }
@@ -68,6 +69,10 @@ public class SucursalServicesImpl implements SucursalService {
         sucursalUpdate.setNombreSucursal(sucursal.getNombreSucursal());
         sucursalUpdate.setDireccionSucursal(sucursal.getDireccionSucursal());
         sucursalUpdate.setTelefonoSucursal(sucursal.getTelefonoSucursal());
+        sucursalUpdate.setCiudadSucursal(sucursal.getCiudadSucursal());
+        sucursalUpdate.setProvinciaSucursal(sucursal.getProvinciaSucursal());
+        sucursalUpdate.setRegionSucursal(sucursal.getRegionSucursal());
+        sucursalUpdate.setEmailSucursal(sucursal.getEmailSucursal());
         SucursalRepository.save(sucursalUpdate);
         return "La sucursal con id: " + id + " se actualizo exitosamente";
     }
