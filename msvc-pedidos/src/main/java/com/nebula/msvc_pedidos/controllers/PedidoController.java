@@ -1,6 +1,7 @@
 package com.nebula.msvc_pedidos.controllers;
 
 import com.nebula.msvc_pedidos.clients.DetallePedidoClientRest;
+import com.nebula.msvc_pedidos.dtos.DetallePedidoDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoConDetalleDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoResponseDTO;
@@ -15,9 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 @RestController
-@RequestMapping("/api/v1/pedido")
+@RequestMapping("/api/pedido")
 @Validated
 public class PedidoController {
 
@@ -51,6 +53,11 @@ public class PedidoController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<List<Pedido>> findAllPedidos() {
+        return ResponseEntity.ok(pedidoService.findAllPedidos());
+    }
+
     //Actualizar Cabecera id usuario y sucursal
     @PutMapping("/{id}")
     public ResponseEntity<Pedido> updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
@@ -67,6 +74,4 @@ public class PedidoController {
             return ResponseEntity.status(404).body(ex.getMessage());
         }
     }
-
-
 }

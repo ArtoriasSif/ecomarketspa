@@ -102,6 +102,12 @@ public class PedidoServiceImpl implements PedidoService {
                 total);
     }
 
+    @Transactional
+    @Override
+    public List<Pedido> findAllPedidos() {
+        return pedidoRepositoty.findAll();
+    }
+
 
     @Transactional
     @Override

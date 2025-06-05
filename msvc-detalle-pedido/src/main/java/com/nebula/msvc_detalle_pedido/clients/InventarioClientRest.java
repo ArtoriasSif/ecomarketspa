@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-inventario", url = "http://localhost:8081/api/v1/inventario")
+@FeignClient(name = "msvc-inventario", url = "http://localhost:8081/api/inventario")
 public interface InventarioClientRest {
 
     @GetMapping("/sucursal/{idSucursal}")

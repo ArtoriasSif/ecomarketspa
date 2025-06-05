@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-detalle-pedido", url = "http://localhost:8087/api/v1/detalle")
+@FeignClient(name = "msvc-detalle-pedido", url = "http://localhost:8087/api/detalle")
 public interface DetallePedidoClientRest {
 
     @GetMapping("/{id}")

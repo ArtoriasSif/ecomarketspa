@@ -11,9 +11,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-@Controller
-@RequestMapping("/api/v1/inventario")
+import org.springframework.web.bind.annotation.CrossOrigin;
+@CrossOrigin(origins = "http://127.0.0.1:5500")
+@RestController
+@RequestMapping("/api/inventario")
 @Validated
 public class InventoryController {
 

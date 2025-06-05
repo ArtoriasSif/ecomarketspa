@@ -10,11 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
-
-@Controller
-@RequestMapping("/api/v1/sucursal")
+@CrossOrigin(origins = "http://127.0.0.1:5500")
+@RestController
+@RequestMapping("/api/sucursal")
 @Validated
 public class SucursalController {
 

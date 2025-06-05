@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-sucursal", url = "http://localhost:8089/api/v1/sucursal")
+@FeignClient(name = "msvc-sucursal", url = "http://localhost:8089/api/sucursal")
 public interface SucursalClientRest {
     @GetMapping
     List<Sucursal> findAll();
