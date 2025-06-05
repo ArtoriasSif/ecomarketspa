@@ -12,4 +12,5 @@ public interface PedidoService {
     Pedido findById(Long id);
     PedidoConDetalleDTO findPedidoConDetalles(Long idPedido);
     String deletePedidoId(Long id);
+    Pedido updatePedido (Long id, Pedido pedido);
 }

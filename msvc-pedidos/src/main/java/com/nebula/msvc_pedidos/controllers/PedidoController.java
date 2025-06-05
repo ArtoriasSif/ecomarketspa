@@ -33,14 +33,14 @@ public class PedidoController {
         return ResponseEntity.status(200).body(pedidoService.findById(id));
     }
 
-
-
+    //Crear la cabecera del pedido
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
         PedidoResponseDTO response = pedidoService.save(pedidoDTO);
         return ResponseEntity.status(201).body(response);
     }
 
+    //Listar pedido con los detalles de productos
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> findByIdPedido(@PathVariable Long id) {
         try {
@@ -49,6 +49,12 @@ public class PedidoController {
         } catch (PedidoException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }
+    }
+
+    //Actualizar Cabecera id usuario y sucursal
+    @PutMapping("/{id}")
+    public ResponseEntity<Pedido> updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
+        return ResponseEntity.status(200).body(pedidoService.updatePedido(id, pedido));
     }
 
     //Determinado como ? dado que en Usuario se ucupara un metodo VOID

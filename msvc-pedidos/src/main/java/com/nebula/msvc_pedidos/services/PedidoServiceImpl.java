@@ -1,11 +1,13 @@
 package com.nebula.msvc_pedidos.services;
 
 import com.nebula.msvc_pedidos.clients.DetallePedidoClientRest;
+import com.nebula.msvc_pedidos.clients.ProductoClientRest;
 import com.nebula.msvc_pedidos.clients.SucursalClientRest;
 import com.nebula.msvc_pedidos.clients.UsuarioClientRest;
 import com.nebula.msvc_pedidos.dtos.*;
 import com.nebula.msvc_pedidos.exceptions.PedidoException;
 import com.nebula.msvc_pedidos.models.DetallePedido;
+import com.nebula.msvc_pedidos.models.Producto;
 import com.nebula.msvc_pedidos.models.Sucursal;
 import com.nebula.msvc_pedidos.models.Usuario;
 import com.nebula.msvc_pedidos.models.entitis.Pedido;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +30,8 @@ public class PedidoServiceImpl implements PedidoService {
     private UsuarioClientRest usuarioClientRest;
     @Autowired
     private SucursalClientRest sucursalClientRest;
+    @Autowired
+    private ProductoClientRest productoClientRest;
     @Autowired
     private DetallePedidoClientRest detallePedidoClientRest;
 
@@ -64,7 +69,6 @@ public class PedidoServiceImpl implements PedidoService {
 
     }
 
-
     @Transactional
     @Override
     public PedidoConDetalleDTO findPedidoConDetalles(Long idPedido) {
@@ -72,6 +76,20 @@ public class PedidoServiceImpl implements PedidoService {
                 .orElseThrow(() -> new PedidoException("No existe el pedido"));
 
         List<DetallePedido> detalles = detallePedidoClientRest.findByIdPedido(idPedido);
+        List<DetallePedidoDTO> detallesDTO = new ArrayList<>();
+        for (DetallePedido detallePedido : detalles) {
+            Producto producto = productoClientRest.findByIdProducto(detallePedido.getIdProducto());
+
+            DetallePedidoDTO detallePedidoDTO = new DetallePedidoDTO(
+                    producto.getNombreProducto(),
+                    detallePedido.getCantidad(),
+                    producto.getPrecio(),
+                    producto.getPrecio()*detallePedido.getCantidad()
+            );
+
+            detallesDTO.add(detallePedidoDTO);
+        }
+
         Usuario usuario = usuarioClientRest.findByIdUsuario(pedido.getIdUsuario());
         Sucursal sucursal = sucursalClientRest.findByIdSucursal(pedido.getIdSucursal());
         Double total = detalles.stream().mapToDouble(DetallePedido::getSubTotal).sum();
@@ -80,8 +98,22 @@ public class PedidoServiceImpl implements PedidoService {
                 usuario.getNombreUsuario(),
                 usuario.getRutUsuario(),
                 sucursal.getNombreSucursal(),
-                detalles,
+                detallesDTO,
                 total);
+    }
+
+
+    @Transactional
+    @Override
+    public Pedido updatePedido (Long id, Pedido pedido){
+        Pedido pedidoUpdate = pedidoRepositoty.findById(id).orElseThrow(
+                () -> new PedidoException("Pedido con la id:"+id+" no encontrado")
+        );
+        if (pedido.getIdSucursal().equals(pedidoUpdate.getIdSucursal()) &&
+            pedido.getIdUsuario().equals(pedidoUpdate.getIdUsuario())){
+            throw new PedidoException("Los datos son iguales no hay cambios");
+        }
+        return pedidoRepositoty.save(pedidoUpdate);
     }
 
     @Transactional

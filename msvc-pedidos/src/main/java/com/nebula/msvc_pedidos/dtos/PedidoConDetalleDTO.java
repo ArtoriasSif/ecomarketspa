@@ -15,6 +15,6 @@ public class PedidoConDetalleDTO {
     private String nombreUsuario;
     private String rutUsuario;
     private String nombreSucursal;
-    private List<DetallePedido> detalles;
+    private List<DetallePedidoDTO> detalles;
     private Double total;
 }
