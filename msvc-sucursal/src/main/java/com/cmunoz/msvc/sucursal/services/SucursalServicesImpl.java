@@ -1,20 +1,28 @@
 package com.cmunoz.msvc.sucursal.services;
 
 
+import com.cmunoz.msvc.sucursal.client.ClientRestInventarioSucursal;
 import com.cmunoz.msvc.sucursal.exception.SucursalException;
+import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
 import com.cmunoz.msvc.sucursal.models.Sucursal;
 import com.cmunoz.msvc.sucursal.repositories.SucursalRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SucursalServicesImpl implements SucursalService {
 
     @Autowired
     private SucursalRepository SucursalRepository;
+
+    @Autowired
+    private ClientRestInventarioSucursal clientRestInventarioSucursal;
+
 
     @Override
     public List<Sucursal> findAllSucursal() {
@@ -51,13 +59,24 @@ public class SucursalServicesImpl implements SucursalService {
     @Transactional
     @Override
     public String deleteByIdSucursal(Long id) {
-        if(SucursalRepository.findById(id).isPresent()) {
-            SucursalRepository.deleteById(id);
-            return "La sucursal con id: " + id + " se elimino exitosamente";
-        }else{
-            throw new SucursalException ("No se encontro la sucursal con id: " + id);
+        Sucursal sucursal = SucursalRepository.findById(id).orElseThrow(
+                () -> new SucursalException("No se encontro la sucursal con id: " + id)
+        );
+
+        // inventario
+        List<Inventario> invetarioEliminar = clientRestInventarioSucursal.findByIdSucursal(id);
+
+        for (Inventario inventario : invetarioEliminar) {
+            clientRestInventarioSucursal.updateInventory(inventario.getIdInventario());
+            clientRestInventarioSucursal.deleteInventoryById(inventario.getIdInventario());
         }
+
+        // sucursal
+        SucursalRepository.deleteById(id);
+
+        return "Sucursal eliminada con éxito";
     }
+
 
     @Transactional
     @Override

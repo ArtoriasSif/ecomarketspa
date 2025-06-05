@@ -1,6 +1,7 @@
 package com.cmunoz.msvc.sucursal.controller;
 
 
+import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
 import com.cmunoz.msvc.sucursal.models.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,14 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/v1/sucursal")
 @Validated
+@RestController
 public class SucursalController {
 
     //Falta agregar PUT
     @Autowired
     private SucursalService sucursalService;
+
+
 
     @GetMapping
     public ResponseEntity<List<Sucursal>> getAllSucursales() {

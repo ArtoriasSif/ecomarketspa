@@ -51,13 +51,18 @@ public class InventoryController {
                 .ok(inventoryService.updateQuantity(dto.getProductoId(), dto.getSucursalId(), dto.getCantidad()));
     }
 
+    @PutMapping("/{id}")
+    public void updateInventory(@PathVariable Long id){
+        inventoryService.updateInventory(id);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteInventoryById(@PathVariable Long id){
-        try{
+    public ResponseEntity<?> deleteInventoryById(@PathVariable Long id) {
+        try {
             inventoryService.deleteById(id);
             return ResponseEntity.status(200)
                     .body("Inventario eliminado exitosamente");
-        } catch (Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(404)
                     .body(ex.getMessage());
         }

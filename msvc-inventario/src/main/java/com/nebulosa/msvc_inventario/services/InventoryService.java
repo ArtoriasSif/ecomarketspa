@@ -14,4 +14,5 @@ public interface InventoryService {
     void deleteById(Long id);
     List<Inventory> findByIdSucursal(Long idSucursal);
     Inventory findByIdProductoAndIdSucursal(Long productoId, Long sucursalId);
+    void updateInventory(Long id);
 }

@@ -95,6 +95,16 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
+    public void updateInventory(Long id) {
+        Inventory inventory = inventoryRepository.findById(id)
+                .orElseThrow(() -> new InventoryException("Inventario no encontrado con id: " + id));
+        inventory.setCantidad(0L);
+        inventoryRepository.save(inventory);
+    }
+
+
+    @Transactional
+    @Override
     public void deleteById(Long id) {
         if (inventoryRepository.findById(id).isPresent()) {
             Inventory inventory = inventoryRepository.findById(id).get();
@@ -109,5 +119,6 @@ public class InventoryServiceImpl implements InventoryService {
             throw new InventoryException("No se encontró el inventario con id: " + id);
         }
     }
+
 }
 
