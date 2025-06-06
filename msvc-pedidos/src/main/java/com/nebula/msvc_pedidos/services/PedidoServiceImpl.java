@@ -129,5 +129,20 @@ public class PedidoServiceImpl implements PedidoService {
 
         return "El pedido con su detalle fue eliminado exitosamente";
     }
+
+    //Deletar pedidos de la sucursal con los detalles
+    @Transactional
+    @Override
+    public void deletarPedidosConDetalles(Long idSucursal){
+        sucursalClientRest.findByIdSucursal(idSucursal);
+        List<Pedido> listaPedidos = pedidoRepositoty.findAllByIdSucursal(idSucursal);
+
+        if(listaPedidos.isEmpty()){
+            throw new PedidoException("El pedido no existe");
+        }
+        for (Pedido P: listaPedidos){
+            deletePedidoId(P.getIdPedido());
+        }
+    }
 }
 

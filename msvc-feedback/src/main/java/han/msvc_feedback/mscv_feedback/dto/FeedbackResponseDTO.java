@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Data
 public class FeedbackResponseDTO {
     private LocalDateTime fechaFeedback;
     private String textoFeedback;

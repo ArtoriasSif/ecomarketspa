@@ -41,6 +41,14 @@ public class ProductController {
                 .body(productService.findByNombreProducto(nombre));
     }
 
+    //Endpoint de las clases clients en otros msvc
+    @GetMapping("/productoDTO")
+    public ResponseEntity<List<ProductoResponseDTO>> getAllProductosDTO(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(productService.findAllProductDTO());
+    }
+
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> createProducto(@Validated @RequestBody Product producto){
         return ResponseEntity
@@ -69,12 +77,6 @@ public class ProductController {
         }
     }
 
-    //Endpoint de las clases clients en otros msvc ??
-    @GetMapping("/productoDTO")
-    public ResponseEntity<List<ProductoResponseDTO>> getAllProductosDTO(){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.findAllProductDTO());
-    }
+
 
 }

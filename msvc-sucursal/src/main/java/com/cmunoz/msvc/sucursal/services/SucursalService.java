@@ -10,7 +10,7 @@ public interface SucursalService {
     Sucursal findByNombreSucursal(String nombreSucursal);
     Sucursal findByIdSucursal(Long id);
     String save(Sucursal sucursal);
-    String deleteByIdSucursal(Long id);
+    String deleteByIdSucursal(Long idSucursal);
     String updateByIdSucursal(Long id, Sucursal sucursal);
 
 }

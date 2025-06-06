@@ -33,13 +33,6 @@ public class PedidoController {
         return ResponseEntity.status(200).body(pedidoService.findById(id));
     }
 
-    //Crear la cabecera del pedido
-    @PostMapping
-    public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
-        PedidoResponseDTO response = pedidoService.save(pedidoDTO);
-        return ResponseEntity.status(201).body(response);
-    }
-
     //Listar pedido con los detalles de productos
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> findByIdPedido(@PathVariable Long id) {
@@ -50,6 +43,15 @@ public class PedidoController {
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
+
+    //Crear la cabecera del pedido
+    @PostMapping
+    public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
+        PedidoResponseDTO response = pedidoService.save(pedidoDTO);
+        return ResponseEntity.status(201).body(response);
+    }
+
+
 
     //Actualizar Cabecera id usuario y sucursal
     @PutMapping("/{id}")
@@ -67,6 +69,13 @@ public class PedidoController {
             return ResponseEntity.status(404).body(ex.getMessage());
         }
     }
+
+    //Deletar pedidos de la sucursal utilizado en cLient delete sucursal
+    @DeleteMapping("/sucursal/{idSucursal}")
+    public void deletePedidoSucursal(@PathVariable Long idSucursal) {
+        pedidoService.deletePedidoId(idSucursal);
+    }
+
 
 
 }

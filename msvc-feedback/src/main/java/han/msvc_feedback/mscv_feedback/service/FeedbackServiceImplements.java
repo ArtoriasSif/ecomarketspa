@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,6 +109,22 @@ public class FeedbackServiceImplements implements FeedbackService{
         return feedbackRepository.findById(id).orElseThrow(
                 () -> new FeedbackException("El feedback con ese id no existe."));
     }
+
+    @Transactional
+    @Override
+    public List<FeedbackResponseDTO> findByAllFeedbackProduct (Long idProducto){
+
+        List<Feedback> feedbacks = feedbackRepository.findAllByProductIdFeedback(idProducto);
+        List<FeedbackResponseDTO> response = feedbacks.stream()
+                .map(f ->new FeedbackResponseDTO(f.getDateFeedback(), f.getTextoFeedback(),
+                        usuarioClientRest.findByIdUsuario(f.getUsuarioIdFeedback()).getNombreUsuario(),
+                        productClientRest.findByIdProducto(f.getProductIdFeedback()).getNombreProducto()
+                ))
+                .collect(Collectors.toList());
+        return response;
+    }
+
+
 
     //FIND ALL
     @Transactional

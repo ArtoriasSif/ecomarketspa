@@ -22,11 +22,30 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> findById(@PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(usuarioService.findById(id));
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<Usuario>> findAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(usuarioService.findAll());
+    }
+
     @PostMapping()
     public ResponseEntity<Usuario> createUsuario(@Validated @RequestBody Usuario usuario) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(usuarioService.save(usuario));
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @Validated @RequestBody UsuarioUpdateDTO usuarioUpdateDTO) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(usuarioService.updateUsuario(id, usuarioUpdateDTO));
     }
 
     @DeleteMapping("/{id}")
@@ -39,23 +58,5 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @Validated @RequestBody UsuarioUpdateDTO usuarioUpdateDTO) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(usuarioService.updateUsuario(id, usuarioUpdateDTO));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Usuario> findById(@PathVariable Long id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(usuarioService.findById(id));
-    }
-
-    @GetMapping()
-    public ResponseEntity<List<Usuario>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(usuarioService.findAll());
     }
 }

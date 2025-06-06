@@ -53,6 +53,18 @@ public class SucursalController {
                 .body(sucursalService.save(sucursal));
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateSucursal(@PathVariable Long id, @Validated @RequestBody Sucursal sucursal) {
+        try{
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(sucursalService.updateByIdSucursal(id, sucursal));
+        }catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ex.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSucursal(@PathVariable Long id) {
         try{
@@ -61,17 +73,6 @@ public class SucursalController {
                     .body(sucursalService.deleteByIdSucursal(id));
 
         } catch (Exception ex){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ex.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateSucursal(@PathVariable Long id, @Validated @RequestBody Sucursal sucursal) {
-        try{
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(sucursalService.updateByIdSucursal(id, sucursal));
-        }catch (Exception ex){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }

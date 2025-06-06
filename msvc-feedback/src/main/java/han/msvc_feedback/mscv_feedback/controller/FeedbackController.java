@@ -56,6 +56,14 @@ public class FeedbackController {
                 .body(feedbackService.findByIdFeedback(id));
     }
 
+    //FIND ALL PRODUCT como mensiono el profe
+    @GetMapping("/producto/{idProducto}")
+    public ResponseEntity<List<FeedbackResponseDTO>> findByAllFeedbackProduct (@PathVariable Long idProducto){
+        return ResponseEntity
+                .status(200)
+                .body(feedbackService.findByAllFeedbackProduct(idProducto));
+    }
+
     //FIND ALL
     @GetMapping()
     public ResponseEntity<List<FeedbackResponseDTO>> findAllFeedback() {

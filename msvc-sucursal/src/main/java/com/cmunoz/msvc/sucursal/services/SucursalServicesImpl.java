@@ -1,18 +1,19 @@
 package com.cmunoz.msvc.sucursal.services;
 
 
-import com.cmunoz.msvc.sucursal.client.ClientRestInventarioSucursal;
+import com.cmunoz.msvc.sucursal.client.SucursalClientRest;
+import com.cmunoz.msvc.sucursal.client.PedidoClientRest;
 import com.cmunoz.msvc.sucursal.exception.SucursalException;
 import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
 import com.cmunoz.msvc.sucursal.models.Sucursal;
 import com.cmunoz.msvc.sucursal.repositories.SucursalRepository;
-import feign.FeignException;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class SucursalServicesImpl implements SucursalService {
@@ -21,8 +22,10 @@ public class SucursalServicesImpl implements SucursalService {
     private SucursalRepository SucursalRepository;
 
     @Autowired
-    private ClientRestInventarioSucursal clientRestInventarioSucursal;
+    private SucursalClientRest sucursalClientRest;
 
+    @Autowired
+    private PedidoClientRest pedidoClientRest;
 
     @Override
     public List<Sucursal> findAllSucursal() {
@@ -58,21 +61,21 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public String deleteByIdSucursal(Long id) {
-        Sucursal sucursal = SucursalRepository.findById(id).orElseThrow(
-                () -> new SucursalException("No se encontro la sucursal con id: " + id)
+    public String deleteByIdSucursal(Long idSucursal) {
+        Sucursal sucursal = SucursalRepository.findById(idSucursal).orElseThrow(
+                () -> new SucursalException("No se encontro la sucursal con id: " + idSucursal)
         );
-
-        // inventario
-        List<Inventario> invetarioEliminar = clientRestInventarioSucursal.findByIdSucursal(id);
+        // Eliminar inventarions de la sucursal
+        List<Inventario> invetarioEliminar = sucursalClientRest.findByIdSucursal(idSucursal);
 
         for (Inventario inventario : invetarioEliminar) {
-            clientRestInventarioSucursal.updateInventory(inventario.getIdInventario());
-            clientRestInventarioSucursal.deleteInventoryById(inventario.getIdInventario());
+            sucursalClientRest.updateInventory(inventario.getIdInventario());
+            sucursalClientRest.deleteInventoryById(inventario.getIdInventario());
         }
+        // Eliminar todos los pedidos asociados a la sucursal
+        pedidoClientRest.deletePedidoSucursal(idSucursal);
 
-        // sucursal
-        SucursalRepository.deleteById(id);
+        SucursalRepository.deleteById(idSucursal);
 
         return "Sucursal eliminada con éxito";
     }
