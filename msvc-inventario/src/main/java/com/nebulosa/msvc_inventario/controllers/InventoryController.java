@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin ("http://localhost:5500")
 @RestController
 @RequestMapping("/api/v1/inventario")
 @Validated

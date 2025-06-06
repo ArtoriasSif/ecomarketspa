@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@CrossOrigin ("http://127.0.0.1:5500")
+@RestController
 @RequestMapping("/api/v1/sucursal")
 @Validated
-@RestController
 public class SucursalController {
 
     //Falta agregar PUT

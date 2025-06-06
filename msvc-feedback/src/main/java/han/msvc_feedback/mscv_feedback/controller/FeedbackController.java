@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@CrossOrigin ("http://localhost:5500")
+@RestController
 @RequestMapping("/api/v1/feedback")
 @Validated
 public class FeedbackController {
