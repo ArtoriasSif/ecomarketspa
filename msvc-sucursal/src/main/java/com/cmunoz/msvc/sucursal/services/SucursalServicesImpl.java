@@ -75,7 +75,7 @@ public class SucursalServicesImpl implements SucursalService {
         // Eliminar todos los pedidos asociados a la sucursal
         pedidoClientRest.deletePedidoSucursal(idSucursal);
 
-        SucursalRepository.deleteById(idSucursal);
+        SucursalRepository.deleteById(sucursal.getIdSucursal());
 
         return "Sucursal eliminada con éxito";
     }
