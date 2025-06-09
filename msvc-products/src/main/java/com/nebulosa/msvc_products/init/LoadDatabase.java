@@ -19,11 +19,14 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(ProductRepository productRepository) {
         return args -> {
-            Product product1 = new Product("Pasta","4000");
-            Product product2 = new Product("Cafe de Hombre","50000");
+            Product product1 = new Product("Cepillo de Dientes de Bambú","2500");
+            Product product2 = new Product("Jabón Artesanal Vegano - Variedad Limón-Maracuyá 110 g","4000");
+            Product product3 = new Product("Shampoo Coloursafe Castaños Natur Vital","6640");
+
 
             log.info("Creating product {}", productRepository.save(product1));
             log.info("Creating product {}", productRepository.save(product2));
+            log.info("Creating product {}", productRepository.save(product3));
 
         };
 

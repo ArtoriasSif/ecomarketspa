@@ -1,11 +1,9 @@
 package com.cmunoz.msvc.sucursal.controller;
 
 
-import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
-import com.cmunoz.msvc.sucursal.models.Sucursal;
+import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,4 @@
-package com.cmunoz.msvc.sucursal.models.Entitys;
+package com.cmunoz.msvc.sucursal.models;
 
 import lombok.*;
 

@@ -1,6 +1,6 @@
 package com.cmunoz.msvc.sucursal.services;
 
-import com.cmunoz.msvc.sucursal.models.Sucursal;
+import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 
 import java.util.List;
 

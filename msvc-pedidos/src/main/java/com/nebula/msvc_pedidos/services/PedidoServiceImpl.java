@@ -11,7 +11,7 @@ import com.nebula.msvc_pedidos.models.Producto;
 import com.nebula.msvc_pedidos.models.Sucursal;
 import com.nebula.msvc_pedidos.models.Usuario;
 import com.nebula.msvc_pedidos.models.entitis.Pedido;
-import com.nebula.msvc_pedidos.repositories.PedidoRepositoty;
+import com.nebula.msvc_pedidos.repositories.PedidoRepository;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.List;
 public class PedidoServiceImpl implements PedidoService {
 
     @Autowired
-    private PedidoRepositoty pedidoRepositoty;
+    private PedidoRepository pedidoRepository;
     @Autowired
     private UsuarioClientRest usuarioClientRest;
     @Autowired
@@ -39,7 +39,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public Pedido findById(Long id) {
-        return pedidoRepositoty.findById(id).orElseThrow(
+        return pedidoRepository.findById(id).orElseThrow(
                 () -> new PedidoException("Pedido no encontrado")
         );
     }
@@ -62,7 +62,7 @@ public class PedidoServiceImpl implements PedidoService {
 
         //Crear el pedido
         Pedido pedido = new Pedido(null,LocalDateTime.now(), pedidoDTO.getIdUsuario(), pedidoDTO.getIdSucursal());
-        pedidoRepositoty.save(pedido);
+        pedidoRepository.save(pedido);
 
         return new PedidoResponseDTO(usuarioClientRest.findByIdUsuario(pedido.getIdUsuario()).getNombreUsuario(),
                 pedido.getIdPedido(), "Cabecera del Pedido registrado exitosamente");
@@ -72,7 +72,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Transactional
     @Override
     public PedidoConDetalleDTO findPedidoConDetalles(Long idPedido) {
-        Pedido pedido = pedidoRepositoty.findById(idPedido)
+        Pedido pedido = pedidoRepository.findById(idPedido)
                 .orElseThrow(() -> new PedidoException("No existe el pedido"));
 
         List<DetallePedido> detalles = detallePedidoClientRest.findByIdPedido(idPedido);
@@ -106,26 +106,26 @@ public class PedidoServiceImpl implements PedidoService {
     @Transactional
     @Override
     public Pedido updatePedido (Long id, Pedido pedido){
-        Pedido pedidoUpdate = pedidoRepositoty.findById(id).orElseThrow(
+        Pedido pedidoUpdate = pedidoRepository.findById(id).orElseThrow(
                 () -> new PedidoException("Pedido con la id:"+id+" no encontrado")
         );
         if (pedido.getIdSucursal().equals(pedidoUpdate.getIdSucursal()) &&
             pedido.getIdUsuario().equals(pedidoUpdate.getIdUsuario())){
             throw new PedidoException("Los datos son iguales no hay cambios");
         }
-        return pedidoRepositoty.save(pedidoUpdate);
+        return pedidoRepository.save(pedidoUpdate);
     }
 
     @Transactional
     @Override
     public String deletePedidoId(Long id){
-        Pedido pedido = pedidoRepositoty.findById(id).orElseThrow(
+        Pedido pedido = pedidoRepository.findById(id).orElseThrow(
                 () -> new PedidoException("Pedido no encontrado")
         );
         //Deletar detalles
         detallePedidoClientRest.deleteByIdPedido(pedido.getIdPedido());
 
-        pedidoRepositoty.delete(pedido);
+        pedidoRepository.delete(pedido);
 
         return "El pedido con su detalle fue eliminado exitosamente";
     }
@@ -135,7 +135,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public void deletarPedidosConDetalles(Long idSucursal){
         sucursalClientRest.findByIdSucursal(idSucursal);
-        List<Pedido> listaPedidos = pedidoRepositoty.findAllByIdSucursal(idSucursal);
+        List<Pedido> listaPedidos = pedidoRepository.findAllByIdSucursal(idSucursal);
 
         if(listaPedidos.isEmpty()){
             throw new PedidoException("El pedido no existe");

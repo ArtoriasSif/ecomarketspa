@@ -1,4 +1,4 @@
-package com.cmunoz.msvc.sucursal.models;
+package com.cmunoz.msvc.sucursal.models.Entitys;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
