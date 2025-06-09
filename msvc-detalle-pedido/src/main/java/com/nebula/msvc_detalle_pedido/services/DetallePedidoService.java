@@ -11,4 +11,5 @@ public interface DetallePedidoService {
     List<DetallePedido> findByIdPedido(Long idPedido);
     void deleteDetallePedido (Long idPedido);
     String updateCatidadProductoPedido (Long idDetallePedido, UpdateQuantidadProductoPedidoDTO updateDTO);
+    List<DetallePedido> findAll();
 }

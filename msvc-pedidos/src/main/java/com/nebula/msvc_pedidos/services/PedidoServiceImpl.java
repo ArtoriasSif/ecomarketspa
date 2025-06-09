@@ -144,5 +144,12 @@ public class PedidoServiceImpl implements PedidoService {
             deletePedidoId(P.getIdPedido());
         }
     }
+
+    @Transactional
+    @Override
+    // Nuevo método para listar todos los pedidos
+    public List<Pedido> findAll() {
+        return (List<Pedido>) pedidoRepository.findAll();
+    }
 }
 

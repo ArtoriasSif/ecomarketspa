@@ -10,14 +10,14 @@ import com.nebula.msvc_pedidos.models.entitis.Pedido;
 import com.nebula.msvc_pedidos.services.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Controller; // Nota: si solo es un REST API, @RestController es más apropiado que @Controller
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")
-@RestController
+@RestController // Asegúrate de usar @RestController para APIs REST
 @RequestMapping("/api/v1/pedido")
 @Validated
 public class PedidoController {
@@ -28,6 +28,11 @@ public class PedidoController {
     @Autowired
     private DetallePedidoClientRest detallePedidoClientRest;
 
+    // Nuevo método para listar todos los pedidos
+    @GetMapping // Este método manejará GET a /api/v1/pedido
+    public ResponseEntity<List<Pedido>> findAll() {
+        return ResponseEntity.ok(pedidoService.findAll());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Pedido> findById(@PathVariable Long id) {
@@ -52,8 +57,6 @@ public class PedidoController {
         return ResponseEntity.status(201).body(response);
     }
 
-
-
     //Actualizar Cabecera id usuario y sucursal
     @PutMapping("/{id}")
     public ResponseEntity<Pedido> updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
@@ -76,7 +79,4 @@ public class PedidoController {
     public void deletePedidoSucursal(@PathVariable Long idSucursal) {
         pedidoService.deletePedidoId(idSucursal);
     }
-
-
-
 }

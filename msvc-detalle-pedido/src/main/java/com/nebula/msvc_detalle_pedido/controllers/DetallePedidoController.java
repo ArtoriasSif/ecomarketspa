@@ -44,6 +44,11 @@ public class DetallePedidoController {
         return ResponseEntity.status(201).body(datelles);
     }
 
+    @GetMapping // Este método manejará GET a /api/v1/detalle
+    public ResponseEntity<List<DetallePedido>> findAllDetalles() {
+        return ResponseEntity.ok(detallePedidoService.findAll()); // Asumiendo que tienes un método findAll
+    }
+
     //Deleta todos los detalles de asociados al Id Pedido, utilizado por client en msvc-pedido
     @DeleteMapping("/{idPedido}")
     public ResponseEntity<Void> delete (@PathVariable Long idPedido) {

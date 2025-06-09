@@ -134,4 +134,11 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
 
     }
 
+    @Transactional
+    @Override
+    // En DetallePedidoService.java
+    public List<DetallePedido> findAll() {
+        return (List<DetallePedido>) detallePedidoRepository.findAll();
+    }
+
 }
