@@ -92,6 +92,12 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
 
     @Transactional
     @Override
+    public List<DetallePedido> findAll(){
+        return detallePedidoRepository.findAll();
+    }
+
+    @Transactional
+    @Override
     public String updateCatidadProductoPedido (Long idDetallePedido, UpdateQuantidadProductoPedidoDTO updateDTO){
         DetallePedido detallePedido = detallePedidoRepository.findById(idDetallePedido).orElseThrow(
                 ()-> new DetallePedidosException("No existe el producto de id: "+idDetallePedido)

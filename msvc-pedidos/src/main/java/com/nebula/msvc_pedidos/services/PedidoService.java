@@ -14,4 +14,5 @@ public interface PedidoService {
     String deletePedidoId(Long id);
     Pedido updatePedido (Long id, Pedido pedido);
     void deletarPedidosConDetalles(Long idSucursal);
+    List<PedidoConDetalleDTO> findAllPedidoConDetalle();
 }

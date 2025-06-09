@@ -44,6 +44,11 @@ public class PedidoController {
         }
     }
 
+    @GetMapping("/detalle")
+    public ResponseEntity <List<PedidoConDetalleDTO>> findAllPedidos() {
+        return ResponseEntity.ok(pedidoService.findAllPedidoConDetalle());
+    }
+
     //Crear la cabecera del pedido
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {

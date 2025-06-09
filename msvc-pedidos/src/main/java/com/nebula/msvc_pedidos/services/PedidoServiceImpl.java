@@ -86,7 +86,6 @@ public class PedidoServiceImpl implements PedidoService {
                     producto.getPrecio(),
                     producto.getPrecio()*detallePedido.getCantidad()
             );
-
             detallesDTO.add(detallePedidoDTO);
         }
 
@@ -100,6 +99,47 @@ public class PedidoServiceImpl implements PedidoService {
                 sucursal.getNombreSucursal(),
                 detallesDTO,
                 total);
+    }
+
+    @Transactional
+    @Override
+    public List<PedidoConDetalleDTO> findAllPedidoConDetalle(){
+        if (pedidoRepository.findAll().isEmpty() || detallePedidoClientRest.findAll().isEmpty()) {
+            throw new PedidoException("No existe pedidos con detalles");
+        }
+
+        List<Pedido> todosPedidos = pedidoRepository.findAll();
+        List<PedidoConDetalleDTO> pedidosDTO = new ArrayList<>();
+
+        for (Pedido P : todosPedidos) {
+            List<DetallePedidoDTO> detallesDTO = new ArrayList<>();
+            List<DetallePedido> detalles = detallePedidoClientRest.findByIdPedido(P.getIdPedido());
+
+            for (DetallePedido D : detalles) {
+                Producto producto = productoClientRest.findByIdProducto(D.getIdProducto());
+
+                DetallePedidoDTO detallePedidoDTO = new DetallePedidoDTO(
+                        producto.getNombreProducto(),
+                        D.getCantidad(),
+                        producto.getPrecio(),
+                        producto.getPrecio() * D.getCantidad()
+                );
+                detallesDTO.add(detallePedidoDTO);
+            }
+
+            Usuario usuario = usuarioClientRest.findByIdUsuario(P.getIdUsuario());
+            Sucursal sucursal = sucursalClientRest.findByIdSucursal(P.getIdSucursal());
+            Double total = detalles.stream().mapToDouble(DetallePedido::getSubTotal).sum();
+
+            pedidosDTO.add(new PedidoConDetalleDTO(
+                    usuario.getNombreUsuario(),
+                    usuario.getRutUsuario(),
+                    sucursal.getNombreSucursal(),
+                    detallesDTO,
+                    total
+            ));
+        }
+        return pedidosDTO;
     }
 
 

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/v1/detalle")
 @Validated
 public class DetallePedidoController {
@@ -28,6 +28,11 @@ public class DetallePedidoController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(detalles);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DetallePedido>> findAll() {
+        return ResponseEntity.ok(detallePedidoService.findAll());
     }
 
     //Crea Update de los detalles de productos
