@@ -1,6 +1,6 @@
 package com.cmunoz.msvc.sucursal.repositories;
 
-import com.cmunoz.msvc.sucursal.models.Sucursal;
+import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

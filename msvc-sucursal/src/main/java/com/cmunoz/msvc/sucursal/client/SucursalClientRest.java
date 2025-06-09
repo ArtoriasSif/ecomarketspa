@@ -1,7 +1,7 @@
 package com.cmunoz.msvc.sucursal.client;
 
 
-import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
+import com.cmunoz.msvc.sucursal.models.Inventario;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

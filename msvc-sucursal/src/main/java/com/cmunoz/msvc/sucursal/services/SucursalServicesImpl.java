@@ -4,8 +4,8 @@ package com.cmunoz.msvc.sucursal.services;
 import com.cmunoz.msvc.sucursal.client.SucursalClientRest;
 import com.cmunoz.msvc.sucursal.client.PedidoClientRest;
 import com.cmunoz.msvc.sucursal.exception.SucursalException;
-import com.cmunoz.msvc.sucursal.models.Entitys.Inventario;
-import com.cmunoz.msvc.sucursal.models.Sucursal;
+import com.cmunoz.msvc.sucursal.models.Inventario;
+import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.repositories.SucursalRepository;
 
 import jakarta.transaction.Transactional;
