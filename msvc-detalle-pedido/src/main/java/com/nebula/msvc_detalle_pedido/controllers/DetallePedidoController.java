@@ -3,6 +3,12 @@ package com.nebula.msvc_detalle_pedido.controllers;
 import com.nebula.msvc_detalle_pedido.dtos.UpdateQuantidadProductoPedidoDTO;
 import com.nebula.msvc_detalle_pedido.models.entities.DetallePedido;
 import com.nebula.msvc_detalle_pedido.services.DetallePedidoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/detalle")
 @Validated
+@Tag(name = "Pedidos ", description = "Operacion CRUD de pedidos")
 public class DetallePedidoController {
 
     @Autowired
@@ -31,6 +38,20 @@ public class DetallePedidoController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Obtiene todos los pedidos", description = "Una Array me devolve una lista de las cabeceras de los pedidos"
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200" ,  description = "Operacion exitosa"),
+            @ApiResponse(responseCode = "404" ,  description = "Pedidos no encontrado")
+    })
+
+    @Parameters(
+            @Parameter(name = "id", description = "Este es el id unico del pedido" , required = true)
+    )
+
+
     public ResponseEntity<List<DetallePedido>> findAll() {
         return ResponseEntity.ok(detallePedidoService.findAll());
     }

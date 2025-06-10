@@ -191,8 +191,14 @@ public class PedidoControlerTest {
         assertThat(fechaDevuelta).matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}.*"); // Validar formato ISO
     }
 
-    @Test
+    @Test //findByIdPedido() | con detalle
     public void shouldReturnOrderWithDetailsSearchById(){
+
+    }
+
+    @Test
+    public void deberiaRetornarAtualizacionPedido(){
+        Long idPedido = 1L;
 
     }
 
