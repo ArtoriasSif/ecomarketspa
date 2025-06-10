@@ -44,6 +44,12 @@ public class PedidoController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<List<Pedido>> findAll() {
+        return ResponseEntity.status(200).body(pedidoService.findAll());
+    }
+
+    //Listar todos los pedidos con detalles
     @GetMapping("/detalle")
     public ResponseEntity <List<PedidoConDetalleDTO>> findAllPedidos() {
         return ResponseEntity.ok(pedidoService.findAllPedidoConDetalle());
@@ -55,8 +61,6 @@ public class PedidoController {
         PedidoResponseDTO response = pedidoService.save(pedidoDTO);
         return ResponseEntity.status(201).body(response);
     }
-
-
 
     //Actualizar Cabecera id usuario y sucursal
     @PutMapping("/{id}")

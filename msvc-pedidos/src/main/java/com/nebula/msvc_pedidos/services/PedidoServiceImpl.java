@@ -103,6 +103,12 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Transactional
     @Override
+    public List<Pedido> findAll(){
+        return pedidoRepository.findAll();
+    }
+
+    @Transactional
+    @Override
     public List<PedidoConDetalleDTO> findAllPedidoConDetalle(){
         if (pedidoRepository.findAll().isEmpty() || detallePedidoClientRest.findAll().isEmpty()) {
             throw new PedidoException("No existe pedidos con detalles");
