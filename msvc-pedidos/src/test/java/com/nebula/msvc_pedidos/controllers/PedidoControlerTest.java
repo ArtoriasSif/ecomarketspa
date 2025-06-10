@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -156,7 +157,44 @@ public class PedidoControlerTest {
         assertThat(nombresUsuarios).containsExactlyInAnyOrder("Solaire", "Artorias");
     }
 
+    @Test // findById()
+    public void shouldReturnOrderSearchById (){
+        // 1. Datos simulados
+        Long idPedido = 1L;
+        Pedido pedidoSimulado = new Pedido(
+                idPedido,
+                LocalDateTime.parse("2025-06-05T20:25:52.275015"),
+                1L, // idUsuario
+                2L  // idSucursal
+        );
 
+        // 2. Mockear comportamiento del repositorio
+        given(pedidoRepository.findById(idPedido)).willReturn(Optional.of(pedidoSimulado));
+
+        // 3. Ejecutar llamada HTTP real usando TestRestTemplate
+        String url = "http://localhost:" + port + "/api/v1/pedido/" + idPedido;
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        // 4. Validar respuesta HTTP
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        // 5. Validar contenido del JSON de respuesta
+        DocumentContext json = JsonPath.parse(response.getBody());
+        Long idDevuelto = json.read("$.idPedido", Long.class);
+        Long idUsuarioDevuelto = json.read("$.idUsuario", Long.class);
+        Long idSucursalDevuelta = json.read("$.idSucursal", Long.class);
+        String fechaDevuelta = json.read("$.fechaPedido");
+
+        assertThat(idDevuelto).isEqualTo(idPedido);
+        assertThat(idUsuarioDevuelto).isEqualTo(1L);
+        assertThat(idSucursalDevuelta).isEqualTo(2L);
+        assertThat(fechaDevuelta).matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}.*"); // Validar formato ISO
+    }
+
+    @Test
+    public void shouldReturnOrderWithDetailsSearchById(){
+
+    }
 
 
 
