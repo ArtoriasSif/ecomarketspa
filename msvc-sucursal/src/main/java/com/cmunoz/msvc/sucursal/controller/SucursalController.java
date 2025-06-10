@@ -3,6 +3,12 @@ package com.cmunoz.msvc.sucursal.controller;
 
 import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +18,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @Controller
 @RequestMapping("/api/v1/sucursal")
 @Validated
 @RestController
+@Tag(name ="Sucursal", description = "Operaciones CRUD de Sucursal")
 public class SucursalController {
 
     //Falta agregar PUT
@@ -25,6 +33,11 @@ public class SucursalController {
 
 
     @GetMapping
+    @Operation(summary = "Obtiene todas las sucursales", description = "Devuelve un list de sucursales en el body")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+    })
     public ResponseEntity<List<Sucursal>> getAllSucursales() {
         return ResponseEntity
                 .ok()
@@ -33,11 +46,27 @@ public class SucursalController {
 
 
     @GetMapping("/id/{id}")
+    @Operation(summary = "Obtiene una sucursal buscando por su ID", description = "Devuelve un body con una sucursal")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+    })
+    @Parameters(value = {
+            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
+    })
     public ResponseEntity<Sucursal> getSucursalFindById(@PathVariable Long id) {
         return ResponseEntity.ok(sucursalService.findByIdSucursal(id));
     }
 
     @GetMapping("/nombre/{nombre}")
+    @Operation(summary = "Obtine una sucursal buscando por su nombre", description = "Devuelve un body con una sucursal")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+    })
+    @Parameters(value = {
+            @Parameter(name = "nombre_sucursal", description = "Nombre de Sucursal")
+    })
     public ResponseEntity<Sucursal> getSucursalByNombreSucursal( @PathVariable String nombre) {
         return ResponseEntity
                 .status(200)
@@ -45,6 +74,14 @@ public class SucursalController {
     }
 
     @PostMapping()
+    @Operation(summary = "Crea una nueva sucursal", description = "Crea una nueva sucursal recibiendo un body")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "405", description = "Sucursal no creada, ID ya usada")
+    })
+    @Parameters(value = {
+            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
+    })
     public ResponseEntity<String> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
                 .status(201)
