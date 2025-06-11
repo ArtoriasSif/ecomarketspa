@@ -1,11 +1,15 @@
 package com.cmunoz.msvc.sucursal.controller;
 
 
+import com.cmunoz.msvc.sucursal.dto.SucursalDTO;
 import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +40,12 @@ public class SucursalController {
     @Operation(summary = "Obtiene todas las sucursales", description = "Devuelve un list de sucursales en el body")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SucursalDTO.class)
+                    )
+            )
     })
     public ResponseEntity<List<Sucursal>> getAllSucursales() {
         return ResponseEntity
@@ -49,7 +58,13 @@ public class SucursalController {
     @Operation(summary = "Obtiene una sucursal buscando por su ID", description = "Devuelve un body con una sucursal")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = SucursalDTO.class)
+                            )
+            )
+
     })
     @Parameters(value = {
             @Parameter(name = "id_sucursal", description = "ID de Sucursal")
@@ -62,7 +77,12 @@ public class SucursalController {
     @Operation(summary = "Obtine una sucursal buscando por su nombre", description = "Devuelve un body con una sucursal")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SucursalDTO.class)
+                    )
+            )
     })
     @Parameters(value = {
             @Parameter(name = "nombre_sucursal", description = "Nombre de Sucursal")
@@ -77,7 +97,8 @@ public class SucursalController {
     @Operation(summary = "Crea una nueva sucursal", description = "Crea una nueva sucursal recibiendo un body")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "405", description = "Sucursal no creada, ID ya usada")
+            @ApiResponse(responseCode = "405", description = "Sucursal no creada, ID ya usada"
+                    )
     })
     @Parameters(value = {
             @Parameter(name = "id_sucursal", description = "ID de Sucursal")
@@ -90,6 +111,14 @@ public class SucursalController {
 
 
     @PutMapping("/{id}")
+    @Operation(summary = "Actualizar una sucursal", description = "Actualiza una sucursal recibiendo un body")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "404", description = "Sucursal no actulizada, Id no encontrada")
+    })
+    @Parameters(value = {
+            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
+    })
     public ResponseEntity<String> updateSucursal(@PathVariable Long id, @Validated @RequestBody Sucursal sucursal) {
         try{
             return ResponseEntity.status(HttpStatus.OK)
@@ -101,6 +130,15 @@ public class SucursalController {
     }
 
     @DeleteMapping("/{id}")
+    @PutMapping("/{id}")
+    @Operation(summary = "Borrar una sucursal", description = "Borrar una sucursal desde su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "404", description = "Sucursal no Borrada, Id no encontrada")
+    })
+    @Parameters(value = {
+            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
+    })
     public ResponseEntity<String> deleteSucursal(@PathVariable Long id) {
         try{
 
