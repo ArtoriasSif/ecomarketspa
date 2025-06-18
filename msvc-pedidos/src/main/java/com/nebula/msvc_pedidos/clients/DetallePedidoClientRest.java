@@ -20,4 +20,6 @@ public interface DetallePedidoClientRest {
 
     @GetMapping
     List<DetallePedido> findAll();
+
+
 }

@@ -1,8 +1,8 @@
 package com.nebula.msvc_pedidos.dtos;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@AllArgsConstructor @NoArgsConstructor @ToString
 @Getter @Setter
 public class PedidoDTO {
     private Long idUsuario;
