@@ -59,11 +59,12 @@ public class PedidoServiceTest {
 
     @BeforeEach
     public void setUp() {
+        Faker faker = new Faker();
         pedidoPrueba = new Pedido(
-               1L, LocalDateTime.now(), 1L, 1L
+               1L, LocalDateTime.now(),  faker.number().numberBetween(1L, 100L),  faker.number().numberBetween(1L, 100L)
         );
-        for (long i = 2; i <= 10; i++) {
-            pedidos.add(new Pedido(i, LocalDateTime.now(), i, i));
+        for (long i = 2; i <= 100; i++) {
+            pedidos.add(new Pedido(i, LocalDateTime.now(), faker.number().numberBetween(1L, 100L),  faker.number().numberBetween(1L, 100L)));
         }
     }
 
@@ -153,7 +154,7 @@ public class PedidoServiceTest {
         Long id = 1L;
 
         // Pedido actual en repositorio
-        Pedido pedidoExistente = new Pedido(id, LocalDateTime.now(), 1L, 1L);
+        Pedido pedidoExistente = pedidos.get(0);
 
         // Pedido con cambios para actualizar
         Pedido pedidoActualizado = new Pedido(id, LocalDateTime.now(), 2L, 2L);
