@@ -66,4 +66,14 @@ public class Sucursal {
     @Schema(description = "Email de una sucursal", example = "lastarria@marketspaeco.cl")
     private String emailSucursal;
 
+    public Sucursal(String nombreSucursal, String direccionSucursal, String ciudadSucursal, String provinciaSucursal, String regionSucursal, String telefonoSucursal, String emailSucursal) {
+        this.nombreSucursal = nombreSucursal;
+        this.direccionSucursal = direccionSucursal;
+        this.ciudadSucursal = ciudadSucursal;
+        this.provinciaSucursal = provinciaSucursal;
+        this.regionSucursal = regionSucursal;
+        this.telefonoSucursal = telefonoSucursal;
+        this.emailSucursal = emailSucursal;
+    }
+
 }

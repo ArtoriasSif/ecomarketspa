@@ -102,7 +102,7 @@ public class SucursalControllerV2 {
     @Parameters(value = {
             @Parameter(name = "id_sucursal", description = "ID de Sucursal")
     })
-    public ResponseEntity<String> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
+    public ResponseEntity<Sucursal> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
                 .status(201)
                 .body(sucursalService.save(sucursal));

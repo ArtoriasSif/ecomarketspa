@@ -50,13 +50,13 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public String save(Sucursal sucursal) {
+    public Sucursal save(Sucursal sucursal) {
         if (SucursalRepository.findByNombreSucursal(sucursal.getNombreSucursal()).isPresent()){
 
             throw new SucursalException("La sucursal con el nombre "+sucursal.getNombreSucursal()+" ya existe");
+        }else{
+        return SucursalRepository.save(sucursal);
         }
-        SucursalRepository.save(sucursal);
-        return "La sucursal "+sucursal.getNombreSucursal()+" se agrego exitosamente";
     }
 
     @Transactional
