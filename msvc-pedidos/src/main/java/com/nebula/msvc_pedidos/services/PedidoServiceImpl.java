@@ -44,30 +44,6 @@ public class PedidoServiceImpl implements PedidoService {
         );
     }
 
-    @Override
-    @Transactional
-    public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
-        //validar que existe Usuario
-        try {
-            usuarioClientRest.findByIdUsuario(pedidoDTO.getIdUsuario());
-        } catch (FeignException ex) {
-            throw new PedidoException("No se encontró el usuario con id: " + pedidoDTO.getIdUsuario());
-        }
-        //validar que existe Sucursal
-        try {
-            sucursalClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
-        } catch (FeignException ex) {
-            throw new PedidoException("No se encontró la sucursal con id: " + pedidoDTO.getIdSucursal());
-        }
-
-        //Crear el pedido
-        Pedido pedido = new Pedido(null,LocalDateTime.now(), pedidoDTO.getIdUsuario(), pedidoDTO.getIdSucursal());
-        pedidoRepository.save(pedido);
-
-        return new PedidoResponseDTO(usuarioClientRest.findByIdUsuario(pedido.getIdUsuario()).getNombreUsuario(),
-                pedido.getIdPedido(), "Cabecera del Pedido registrado exitosamente");
-
-    }
 
     @Transactional
     @Override
@@ -148,6 +124,30 @@ public class PedidoServiceImpl implements PedidoService {
         return pedidosDTO;
     }
 
+    @Override
+    @Transactional
+    public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
+        //validar que existe Usuario
+        try {
+            usuarioClientRest.findByIdUsuario(pedidoDTO.getIdUsuario());
+        } catch (FeignException ex) {
+            throw new PedidoException("No se encontró el usuario con id: " + pedidoDTO.getIdUsuario());
+        }
+        //validar que existe Sucursal
+        try {
+            sucursalClientRest.findByIdSucursal(pedidoDTO.getIdSucursal());
+        } catch (FeignException ex) {
+            throw new PedidoException("No se encontró la sucursal con id: " + pedidoDTO.getIdSucursal());
+        }
+
+        //Crear el pedido
+        Pedido pedido = new Pedido(null,LocalDateTime.now(), pedidoDTO.getIdUsuario(), pedidoDTO.getIdSucursal());
+        pedidoRepository.save(pedido);
+
+        return new PedidoResponseDTO(usuarioClientRest.findByIdUsuario(pedido.getIdUsuario()).getNombreUsuario(),
+                pedido.getIdPedido(), "Cabecera del Pedido registrado exitosamente");
+
+    }
 
     @Transactional
     @Override
