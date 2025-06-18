@@ -102,8 +102,8 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
         DetallePedido detallePedido = detallePedidoRepository.findById(idDetallePedido).orElseThrow(
                 ()-> new DetallePedidosException("No existe el producto de id: "+idDetallePedido)
         );
-
-        Long idSucursal = detallePedido.getIdPedido();
+        Pedido pedido = pedidoClientRest.findById(detallePedido.getIdPedido());
+        Long idSucursal = pedido.getIdSucursal();
         Long idProducto = detallePedido.getIdProducto();
 
         List<Inventario> inventarioList = inventarioClientRest.findByIdSucursal(idSucursal);
@@ -139,5 +139,7 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
         detallePedidoRepository.deleteAll(detallePedidos);
 
     }
+
+
 
 }

@@ -164,7 +164,7 @@ public class PedidoServiceTest {
         // Mock: save devuelve el pedido actualizado (simulación)
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Llamada al método bajo prueba
+        // Llamada al metodo bajo prueba
         Pedido resultado = pedidoService.updatePedido(id, pedidoActualizado);
 
         // Verificaciones
@@ -284,7 +284,7 @@ public class PedidoServiceTest {
         when(usuarioClientRest.findByIdUsuario(10L)).thenReturn(usuarioFake);
         when(sucursalClientRest.findByIdSucursal(20L)).thenReturn(sucursalFake);
 
-        // Ejecutar el método bajo prueba
+        // Ejecutar el metodo bajo prueba
         PedidoConDetalleDTO resultado = pedidoService.findPedidoConDetalles(idPedido);
 
         // Validaciones
@@ -309,12 +309,12 @@ public class PedidoServiceTest {
         assertThat(resultado.getTotal()).isEqualTo(200.0); // 100 + 100
 
         // Verificar invocaciones
-        verify(pedidoRepository).findById(idPedido);
-        verify(detallePedidoClientRest).findByIdPedido(idPedido);
-        verify(productoClientRest).findByIdProducto(200L);
-        verify(productoClientRest).findByIdProducto(201L);
-        verify(usuarioClientRest).findByIdUsuario(10L);
-        verify(sucursalClientRest).findByIdSucursal(20L);
+        verify(pedidoRepository, times(1)).findById(idPedido);
+        verify(detallePedidoClientRest, times(1)).findByIdPedido(idPedido);
+        verify(productoClientRest, times(1)).findByIdProducto(200L);
+        verify(productoClientRest, times(1)).findByIdProducto(201L);
+        verify(usuarioClientRest, times(1)).findByIdUsuario(10L);
+        verify(sucursalClientRest, times(1)).findByIdSucursal(20L);
     }
 
 
