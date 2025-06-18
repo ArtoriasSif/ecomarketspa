@@ -50,4 +50,7 @@ public class Usuario {
     @NotBlank(message = "El campo numero telefono no puede estar vacio.")
     @Pattern(regexp = "\\+56 9\\d{1,8}", message = "El formato del telefono debe ser +56 9XXXXXXXX")
     private String telefonoUsuario;
+
+    public Usuario(String otroUser, String mail, String s, String s1, String s2) {
+    }
 }
