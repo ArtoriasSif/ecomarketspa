@@ -70,6 +70,7 @@ public class PedidoServiceImpl implements PedidoService {
         Double total = detalles.stream().mapToDouble(DetallePedido::getSubTotal).sum();
 
         return new PedidoConDetalleDTO(
+                pedido.getIdPedido(),
                 usuario.getNombreUsuario(),
                 usuario.getRutUsuario(),
                 sucursal.getNombreSucursal(),
@@ -114,6 +115,7 @@ public class PedidoServiceImpl implements PedidoService {
             Double total = detalles.stream().mapToDouble(DetallePedido::getSubTotal).sum();
 
             pedidosDTO.add(new PedidoConDetalleDTO(
+                    P.getIdPedido(),
                     usuario.getNombreUsuario(),
                     usuario.getRutUsuario(),
                     sucursal.getNombreSucursal(),

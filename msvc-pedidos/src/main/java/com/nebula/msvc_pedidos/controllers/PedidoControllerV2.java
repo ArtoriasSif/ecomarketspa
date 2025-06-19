@@ -1,13 +1,17 @@
 package com.nebula.msvc_pedidos.controllers;
 
-import com.nebula.msvc_pedidos.clients.DetallePedidoClientRest;
+import com.nebula.msvc_pedidos.assemblers.PedidoConDetalleModelAssembler;
+import com.nebula.msvc_pedidos.assemblers.PedidoModelAssembler;
+import com.nebula.msvc_pedidos.clients.SucursalClientRest;
 import com.nebula.msvc_pedidos.dtos.ErrorDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoConDetalleDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoDTO;
 import com.nebula.msvc_pedidos.dtos.PedidoResponseDTO;
 import com.nebula.msvc_pedidos.exceptions.PedidoException;
+import com.nebula.msvc_pedidos.models.Sucursal;
 import com.nebula.msvc_pedidos.models.entitis.Pedido;
 import com.nebula.msvc_pedidos.services.PedidoService;
+import feign.FeignException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -18,49 +22,74 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/api/v1/pedido")
+@RequestMapping("/api/v2/pedido")
 @Validated
-@Tag(name = "Pedidos", description = "Operaciones CRUD de pedidos")
-public class PedidoController {
+@Tag(name = "Pedidos V2", description = "Operaciones CRUD de pedidos hateoas")
+public class PedidoControllerV2 {
 
     @Autowired
     private PedidoService pedidoService;
 
     @Autowired
-    private DetallePedidoClientRest detallePedidoClientRest;
+    private SucursalClientRest sucursalClientRest;
 
+    @Autowired
+    private PedidoModelAssembler pedidoModelAssembler;
+
+    @Autowired
+    private PedidoConDetalleModelAssembler pedidoConDetalleModelAssembler;
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtiene un pedido", description = "A través del id suministrado devuelve el pedido con esa id")
-    @ApiResponses( value = {
-            @ApiResponse(responseCode = "200", description = "Operacion existosa"),
+    @Operation(
+            summary = "Obtiene un pedido (V2)",
+            description = "Devuelve un pedido en formato HATEOAS a partir del ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Operación exitosa",
+                    content = @Content(
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
+                            schema = @Schema(implementation = Pedido.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pedido no encontrado, con el id suministrado",
+                    description = "Pedido no encontrado con el ID suministrado",
                     content = @Content(
-                            mediaType = "application/json",
-                            schema =  @Schema(implementation = ErrorDTO.class)
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
     @Parameters(value = {
-            @Parameter(name="id", description = "Este es el id unico del pedido", required = true)
+            @Parameter(name = "id", description = "ID único del pedido", required = true)
     })
-    public ResponseEntity<Pedido> findById(@PathVariable Long id) {
-        return ResponseEntity.status(200).body(pedidoService.findById(id));
+    public ResponseEntity<EntityModel<Pedido>> findById(@PathVariable Long id) {
+        Pedido pedido = pedidoService.findById(id);
+        EntityModel<Pedido> recurso = pedidoModelAssembler.toModel(pedido);
+        return ResponseEntity.ok(recurso);
     }
 
-    //Listar pedido con los detalles de productos
+
     @GetMapping("/detalle/{id}")
     @Operation(
-            summary = "Obtiene un pedido con sus detalles",
+            summary = "Obtiene un pedido con sus detalles (V2)",
             description = "Devuelve un pedido junto con los detalles de productos, usuario y sucursal relacionados"
     )
     @ApiResponses(value = {
@@ -68,7 +97,7 @@ public class PedidoController {
                     responseCode = "200",
                     description = "Pedido encontrado con sus detalles",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = PedidoConDetalleDTO.class)
                     )
             ),
@@ -76,40 +105,53 @@ public class PedidoController {
                     responseCode = "404",
                     description = "Pedido no encontrado con el ID proporcionado",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
-    public ResponseEntity<?> findByIdPedido(@PathVariable Long id) {
+    @Parameters(value = {
+            @Parameter(name="id", description = "Este es el id unico de pedido", required = true)
+    })
+    public ResponseEntity<EntityModel<PedidoConDetalleDTO>> findByIdPedido(@PathVariable Long id) {
         try {
             PedidoConDetalleDTO detalles = pedidoService.findPedidoConDetalles(id);
-            return ResponseEntity.ok(detalles);
+            EntityModel<PedidoConDetalleDTO> recurso = pedidoConDetalleModelAssembler.toModel(detalles);
+            return ResponseEntity.ok(recurso);
         } catch (PedidoException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).build();
         }
     }
+
 
     @GetMapping
     @Operation(
             summary = "Lista todos los pedidos",
-            description = "Devuelve una lista completa de todos los pedidos registrados en el sistema"
+            description = "Devuelve una lista completa de todos los pedidos registrados en el sistema con enlaces HATEOAS"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Lista de pedidos obtenida correctamente",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Pedido.class))
                     )
             )
     })
-    public ResponseEntity<List<Pedido>> findAll() {
-        return ResponseEntity.status(200).body(pedidoService.findAll());
+    public ResponseEntity<CollectionModel<EntityModel<Pedido>>> findAll() {
+        List<Pedido> pedidos = pedidoService.findAll();
+
+        List<EntityModel<Pedido>> pedidosModel = pedidos.stream()
+                .map(pedidoModelAssembler::toModel)
+                .toList();
+
+        return ResponseEntity.ok(
+                CollectionModel.of(pedidosModel,
+                        linkTo(methodOn(PedidoControllerV2.class).findAll()).withSelfRel())
+        );
     }
 
-    //Listar todos los pedidos con detalles
     @GetMapping("/detalle")
     @Operation(
             summary = "Lista todos los pedidos con sus detalles",
@@ -120,7 +162,7 @@ public class PedidoController {
                     responseCode = "200",
                     description = "Lista de pedidos con detalles obtenida correctamente",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = PedidoConDetalleDTO.class))
                     )
             ),
@@ -128,16 +170,24 @@ public class PedidoController {
                     responseCode = "404",
                     description = "No existen pedidos con detalles registrados",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
-    public ResponseEntity <List<PedidoConDetalleDTO>> findAllPedidos() {
-        return ResponseEntity.ok(pedidoService.findAllPedidoConDetalle());
+    public ResponseEntity<CollectionModel<EntityModel<PedidoConDetalleDTO>>> findAllPedidosConDetalle() {
+        List<PedidoConDetalleDTO> pedidos = pedidoService.findAllPedidoConDetalle();
+
+        List<EntityModel<PedidoConDetalleDTO>> pedidosModel = pedidos.stream()
+                .map(pedidoConDetalleModelAssembler::toModel)
+                .toList();
+
+        return ResponseEntity.ok(
+                CollectionModel.of(pedidosModel,
+                        linkTo(methodOn(PedidoControllerV2.class).findAllPedidosConDetalle()).withSelfRel())
+        );
     }
 
-    //Crear la cabecera del pedido
     @PostMapping
     @Operation(
             summary = "Crea la cabecera de un pedido",
@@ -148,7 +198,7 @@ public class PedidoController {
                     responseCode = "201",
                     description = "Pedido creado exitosamente",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = PedidoResponseDTO.class)
                     )
             ),
@@ -156,17 +206,27 @@ public class PedidoController {
                     responseCode = "400",
                     description = "Error en la validación del usuario o la sucursal",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "pedido a crear",
+            content = @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = Pedido.class)
+            )
+    )
     public ResponseEntity<PedidoResponseDTO> save(@RequestBody PedidoDTO pedidoDTO) {
-        PedidoResponseDTO response = pedidoService.save(pedidoDTO);
-        return ResponseEntity.status(201).body(response);
+        try {
+            PedidoResponseDTO response = pedidoService.save(pedidoDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (PedidoException e) {
+            return ResponseEntity.badRequest().body(new PedidoResponseDTO(null, null, e.getMessage()));
+        }
     }
 
-    //Actualizar Cabecera id usuario y sucursal
     @PutMapping("/{id}")
     @Operation(
             summary = "Actualiza un pedido",
@@ -177,7 +237,7 @@ public class PedidoController {
                     responseCode = "200",
                     description = "Pedido actualizado correctamente",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = Pedido.class)
                     )
             ),
@@ -185,7 +245,7 @@ public class PedidoController {
                     responseCode = "404",
                     description = "Pedido no encontrado con el ID indicado",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             ),
@@ -193,16 +253,22 @@ public class PedidoController {
                     responseCode = "400",
                     description = "No se detectaron cambios en el pedido",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
-    public ResponseEntity<Pedido> updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
-        return ResponseEntity.status(200).body(pedidoService.updatePedido(id, pedido));
+    public ResponseEntity<?> updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
+        try {
+            Pedido actualizado = pedidoService.updatePedido(id, pedido);
+            return ResponseEntity.ok(actualizado);
+        } catch (PedidoException e) {
+            return ResponseEntity.status(
+                    e.getMessage().contains("no encontrado") ? 404 : 400
+            ).body(e.getMessage());
+        }
     }
 
-    //Determinado como ? dado que en Usuario se ucupara un metodo VOID
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Elimina un pedido y sus detalles",
@@ -213,7 +279,7 @@ public class PedidoController {
                     responseCode = "200",
                     description = "Pedido y sus detalles eliminados correctamente",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = String.class)
                     )
             ),
@@ -221,21 +287,26 @@ public class PedidoController {
                     responseCode = "404",
                     description = "No se encontró el pedido con el ID proporcionado",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        try{
-            String mensaje = pedidoService.deletePedidoId(id);
-            return ResponseEntity.status(200).body(mensaje);
-        }catch (Exception ex){
-            return ResponseEntity.status(404).body(ex.getMessage());
+    public ResponseEntity<?> delete(@PathVariable Long id) {//PUEDE SER QUE TENGA QUE ADD EN CONTROLLER V1
+        String resultado = pedidoService.deletePedidoId(id);
+
+        if ("Pedido eliminado".equals(resultado)) {
+            return ResponseEntity.noContent().build();  // 204 No Content, sin cuerpo
+        } else {
+            Map<String, Object> error = Map.of(
+                    "status", 404,
+                    "message", resultado,
+                    "timestamp", LocalDateTime.now().toString()
+            );
+            return ResponseEntity.status(404).body(error);
         }
     }
 
-    //Deletar pedidos de la sucursal utilizado en cLient delete sucursal
     @DeleteMapping("/sucursal/{idSucursal}")
     @Operation(
             summary = "Elimina todos los pedidos de una sucursal",
@@ -250,15 +321,39 @@ public class PedidoController {
                     responseCode = "404",
                     description = "No existe la sucursal o no hay pedidos asociados",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = ErrorDTO.class)
                     )
             )
     })
-    public void deletePedidoSucursal(@PathVariable Long idSucursal) {
-        pedidoService.deletePedidoId(idSucursal);
+    public ResponseEntity<String> deletePedidoSucursal(@PathVariable Long idSucursal) {//PUEDE SER QUE TENGA QUE ADD EN CONTROLLER V1
+        try {
+            // Validar que la sucursal exista, llamando al servicio que usa la clase Sucursal (POJO)
+            Sucursal sucursal = sucursalClientRest.findByIdSucursal(idSucursal);
+            if (sucursal == null) {
+                return ResponseEntity.status(404).body("No se encontró la sucursal con id: " + idSucursal);
+            }
+
+            // Si existe, proceder a eliminar pedidos y detalles
+            pedidoService.deletarPedidosConDetalles(idSucursal);
+
+            return ResponseEntity.ok("Pedidos y detalles de la sucursal " + idSucursal + " eliminados exitosamente");
+        } catch (FeignException.NotFound ex) {
+            return ResponseEntity.status(404).body("Sucursal no encontrada con ID: " + idSucursal);
+        } catch (PedidoException ex) {
+            return ResponseEntity.status(404).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Error interno: " + ex.getMessage());
+        }
+
     }
 
 
 
 }
+
+
+
+
+
+
