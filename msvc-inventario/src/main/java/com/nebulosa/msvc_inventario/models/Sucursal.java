@@ -17,5 +17,11 @@ public class Sucursal {
 
     private String telefonoSucursal;
 
-    private String EmailSucursal;
+    private String nombreSucursal;
+
+    private String provinciaSucursal;
+
+    private String regionSucursal;
+
+     private String emailSucursal;
 }

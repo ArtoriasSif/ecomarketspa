@@ -13,5 +13,5 @@ public class Product {
 
     private String nombreProducto;
 
-    private Long cantidad;
+    private Double precioProducto;
 }

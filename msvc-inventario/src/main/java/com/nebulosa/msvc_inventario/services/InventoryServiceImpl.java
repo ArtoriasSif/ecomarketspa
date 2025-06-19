@@ -3,7 +3,6 @@ package com.nebulosa.msvc_inventario.services;
 import com.nebulosa.msvc_inventario.clients.ProductoClientRest;
 import com.nebulosa.msvc_inventario.clients.SucursalClientRest;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
-import feign.FeignException;
 import feign.FeignException.NotFound;
 import com.nebulosa.msvc_inventario.models.entities.Inventory;
 import com.nebulosa.msvc_inventario.repositories.InventoryRepository;
@@ -47,6 +46,14 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Transactional
     @Override
+    public Inventory findByIdProductoAndIdSucursal(Long productoId, Long sucursalId) {
+        return inventoryRepository.findByIdProductoAndIdSucursal(productoId, sucursalId)
+                .orElseThrow(() -> new InventoryException("No se encontró inventario para el producto "
+                        + productoId + " en la sucursal " + sucursalId));
+    }
+
+    @Transactional
+    @Override
     public Inventory save(Inventory inventory) {
         //Validar que existe producto
         try {
@@ -71,13 +78,6 @@ public class InventoryServiceImpl implements InventoryService {
         return inventoryRepository.save(inventory);
     }
 
-    @Transactional
-    @Override
-    public Inventory findByIdProductoAndIdSucursal(Long productoId, Long sucursalId) {
-        return inventoryRepository.findByIdProductoAndIdSucursal(productoId, sucursalId)
-                .orElseThrow(() -> new InventoryException("No se encontró inventario para el producto "
-                        + productoId + " en la sucursal " + sucursalId));
-    }
 
     @Transactional
     @Override
