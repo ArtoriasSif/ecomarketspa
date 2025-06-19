@@ -3,32 +3,43 @@ package com.nebulosa.msvc_products.init;
 import com.nebulosa.msvc_products.models.entities.Product;
 import com.nebulosa.msvc_products.repositories.ProductRepository;
 
+import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
+import java.util.Locale;
 
-
-@Configuration
-public class LoadDatabase {
+@Component
+public class LoadDatabase implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
-    @Bean
-    CommandLineRunner initDatabase(ProductRepository productRepository) {
-        return args -> {
-            Product product1 = new Product("Cepillo de Dientes de Bambú","2500");
-            Product product2 = new Product("Jabón Artesanal Vegano - Variedad Limón-Maracuyá 110 g","4000");
-            Product product3 = new Product("Shampoo Coloursafe Castaños Natur Vital","6640");
+    @Autowired
+    ProductRepository productRepository;
 
+    @Override
+    public void run(String... args) throws Exception {
+        Faker faker = new Faker(new Locale("pt", "BR"));
 
-            log.info("Creating product {}", productRepository.save(product1));
-            log.info("Creating product {}", productRepository.save(product2));
-            log.info("Creating product {}", productRepository.save(product3));
+        if (productRepository.count() == 0) {
+            for (int i = 0; i < 50; i++) {
+                Product producto = new Product();
 
-        };
+                producto.setNombreProducto(faker.commerce().productName()); // Ej: "Jabón natural"
+                producto.setPrecio(faker.number().randomDouble(0, 1000, 10000)); // Precio entre 1000 y 10000
 
+                producto = productRepository.save(producto);
+                log.info("Producto creado: {}", producto);
+            }
+            log.info("Se crearon 50 productos de prueba");
+        } else {
+            log.info("Ya existen productos, no se insertó ninguno nuevo");
+        }
     }
 }
+

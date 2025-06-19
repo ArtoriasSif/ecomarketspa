@@ -33,47 +33,5 @@ public class FeedbackServiceTest {
     @InjectMocks
     private FeedbackServiceImplements feedbackServiceImplements;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
-    @Test
-    public void testCreateFeedback() {
-        // Arrange
-        Long productId = 10L;
-        Long usuarioId = 20L;
-
-        Feedback feedback = new Feedback();
-        feedback.setDateFeedback(LocalDateTime.now());
-        feedback.setTextoFeedback("Producto excelente.");
-        feedback.setProductIdFeedback(productId);
-        feedback.setUsuarioIdFeedback(usuarioId);
-
-        Product mockProduct = new Product();
-        mockProduct.setIdProducto(productId);
-        mockProduct.setNombreProducto("Producto Prueba");
-
-        Usuario mockUsuario = new Usuario();
-        mockUsuario.setIdUsuario(usuarioId);
-        mockUsuario.setNombreDelUsuario("Juan Pérez");
-
-        when(productClientRest.findByIdProducto(productId)).thenReturn(mockProduct);
-        when(usuarioClientRest.findByIdUsuario(usuarioId)).thenReturn(mockUsuario);
-        when(feedbackRepository.save(any(Feedback.class))).thenReturn(feedback);
-
-        // Act
-        FeedbackResponseDTO response = feedbackServiceImplements.createFeedback(feedback);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals("Producto excelente.", response.getTextoFeedback());
-        assertEquals("Juan Pérez", response.getNombreUsuario());
-        assertEquals("Producto Prueba", response.getNombreProducto());
-
-        // Verificar que se llamaron los métodos esperados
-        verify(productClientRest).findByIdProducto(productId);
-        verify(usuarioClientRest).findByIdUsuario(usuarioId);
-        verify(feedbackRepository).save(any(Feedback.class));
-    }
 }

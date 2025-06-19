@@ -5,40 +5,42 @@ import com.nebula.msvc_pedidos.repositories.PedidoRepository;
 import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Random;
 
-@Configuration
-public class LoadDatabase {
+@Component
+public class LoadDatabase implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
-    @Bean
-    CommandLineRunner initPedidos(PedidoRepository pedidoRepository) {
-        return args -> {
-            if (pedidoRepository.count() == 0) {
-                Faker faker = new Faker(new Locale("es", "CL"));
-                Random random = new Random();
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
+    @Override
+    public void run(String... args) throws Exception {
+        Random random = new Random();
 
-                Long[] sucursales = {1L, 2L, 3L};
+        Long[] sucursales = {1L, 2L, 3L}; // IDs ficticios de sucursal
 
+        if (pedidoRepository.count() == 0) {
+            for (int i = 1; i <= 100; i++) {
+                Pedido pedido = new Pedido();
 
-                for (int i = 1; i <= 10; i++) {
-                    Pedido pedido = new Pedido();
-                    pedido.setIdUsuario((long) i);
-                    pedido.setIdSucursal(sucursales[random.nextInt(sucursales.length)]); // sucursal aleatoria
-                    pedido.setFechaPedido(LocalDateTime.now().minusDays(random.nextInt(30))); // fecha radon sysdate between 30 dias
+                pedido.setIdUsuario((long) i);
+                pedido.setIdSucursal(sucursales[random.nextInt(sucursales.length)]);
+                pedido.setFechaPedido(LocalDateTime.now().minusDays(random.nextInt(30)));
 
-                    log.info("Pedido creado: {}",pedidoRepository.save(pedido));
-                }
+                pedido = pedidoRepository.save(pedido);
+                log.info("Pedido creado: {}", pedido);
             }
-        };
+        }
     }
 }
 
