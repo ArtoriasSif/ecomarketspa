@@ -163,6 +163,33 @@ public class DetallePedidoControllerV2 {
 
         return ResponseEntity.ok(recurso);
     }
+
+    @DeleteMapping("/{idPedido}")
+    @Operation(
+            summary = "Eliminar detalles de pedido por ID de pedido",
+            description = "Elimina todos los detalles de pedido asociados al ID de pedido proporcionado. Este endpoint es utilizado por el cliente en el microservicio de pedidos."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Detalles de pedido eliminados correctamente"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No se encontraron detalles asociados al ID de pedido o el pedido no existe",
+                    content = @Content(schema = @Schema(implementation = ErrorDTO.class))
+            )
+    })
+    @Parameter(
+            name = "idPedido",
+            description = "ID del pedido cuyos detalles serán eliminados",
+            required = true
+    )
+    public ResponseEntity<Void> delete(@PathVariable Long idPedido) {
+        detallePedidoService.deleteDetallePedido(idPedido);
+        return ResponseEntity.noContent().build(); // HTTP 204
+    }
+
 }
 
 
