@@ -1,6 +1,7 @@
 package com.nebula.msvc_detalle_pedido.models.entities;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +12,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Schema(name = "DetallePedido", description = "Entidad que representa el detalle de un pedido",
+        example = "{\n" +
+                "  \"idDetallePedido\": 123,\n" +
+                "  \"idPedido\": 456,\n" +
+                "  \"idProducto\": 789,\n" +
+                "  \"cantidad\": 2,\n" +
+                "  \"subTotal\": 49.99\n" +
+                "}"
+)
 public class DetallePedido {
 
     @Id

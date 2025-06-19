@@ -16,12 +16,12 @@ public class SwaggerConfig {
         contact.setEmail("ma.delara@duocuc.cl");
         return new OpenAPI()
                     .info(new Info()
-                        .title("API - MSVC - Pedidos")
+                        .title("API - MSVC - Detalles Pedidos")
                             .version("1.0.0")
                             .description("Este es el microservicio de Pedidos, con el puedes realizar todas las consultas" +
                                     "CRUD que necesitas")
                             .contact(contact)
-                            .termsOfService("XDDD")
+                            .termsOfService("JAVA CLASS IN PREPARE TO DIE")
                             .summary("Esta es una API dentro de un proyecto de MSVC")
                     );
 

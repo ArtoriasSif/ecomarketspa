@@ -1,14 +1,9 @@
 package com.nebula.msvc_detalle_pedido.services;
 
-import com.nebula.msvc_detalle_pedido.clients.InventarioClientRest;
-import com.nebula.msvc_detalle_pedido.clients.PedidoClientRest;
-import com.nebula.msvc_detalle_pedido.clients.ProductoClientRest;
-import com.nebula.msvc_detalle_pedido.dtos.QuantityUpdateDTO;
-import com.nebula.msvc_detalle_pedido.dtos.UpdateQuantidadProductoPedidoDTO;
+import com.nebula.msvc_detalle_pedido.clients.*;
+import com.nebula.msvc_detalle_pedido.dtos.*;
 import com.nebula.msvc_detalle_pedido.exceptions.DetallePedidosException;
-import com.nebula.msvc_detalle_pedido.models.Inventario;
-import com.nebula.msvc_detalle_pedido.models.Pedido;
-import com.nebula.msvc_detalle_pedido.models.Producto;
+import com.nebula.msvc_detalle_pedido.models.*;
 import com.nebula.msvc_detalle_pedido.models.entities.DetallePedido;
 import com.nebula.msvc_detalle_pedido.repositories.DetallePedidoRepository;
 import feign.FeignException;
@@ -17,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +23,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -44,6 +41,12 @@ public class DetallePedidoServiceImplTest {
 
     @Mock
     private InventarioClientRest inventarioClientRest;
+
+    @Mock
+    private UsuarioClientRest usuarioClientRest;
+
+    @Mock
+    private SucursalClientRest sucursalClientRest;
 
 
     @InjectMocks
@@ -85,6 +88,54 @@ public class DetallePedidoServiceImplTest {
         verify(detallePedidoRepository, times(1)).findByIdPedido(idPedido);
     }
 
+    @Test
+    @DisplayName("Debe retornar los detalles DTOS de un pedido por su ID")
+    void findDetailsByIdPedido_retornarListaDTOs() {
+        // Arrange
+        Long idPedido = 1L;
+
+        DetallePedido detalle = new DetallePedido();
+        detalle.setIdDetallePedido(10L);
+        detalle.setIdPedido(idPedido);
+        detalle.setIdProducto(99L);
+        detalle.setCantidad(2L);
+        detalle.setSubTotal(200.0);
+
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(idPedido);
+        pedido.setIdUsuario(5L);
+        pedido.setIdSucursal(7L);
+
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario("Matheus");
+
+        Sucursal sucursal = new Sucursal();
+        sucursal.setNombreSucursal("Central");
+
+        Producto producto = new Producto();
+        producto.setNombreProducto("Laptop");
+        producto.setPrecio(100.0);
+
+        when(detallePedidoRepository.findByIdPedido(idPedido)).thenReturn(List.of(detalle));
+        when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
+        when(usuarioClientRest.findByIdUsuario(5L)).thenReturn(usuario);
+        when(sucursalClientRest.findByIdSucursal(7L)).thenReturn(sucursal);
+        when(productoClientRest.findByIdProducto(99L)).thenReturn(producto);
+
+        // Act
+        List<DetallePedidoResponseDTO> result = detallePedidoService.findDetailsByIdPedido(idPedido);
+
+        // Assert
+        assertEquals(1, result.size());
+        DetallePedidoResponseDTO dto = result.get(0);
+        assertEquals(10L, dto.getIdDetallePedido());
+        assertEquals("Laptop", dto.getNombreProducto());
+        assertEquals("Matheus", dto.getNombreUsuario());
+        assertEquals("Central", dto.getNombreSucursal());
+        assertEquals(100.0, dto.getPrecioUnitario());
+    }
+
+
     //GetMapping retorna todos los detalles de todos los pedidos
     @Test
     @DisplayName("Debe retornar todos los detalles de pedido")
@@ -98,42 +149,80 @@ public class DetallePedidoServiceImplTest {
         verify(detallePedidoRepository, times(1)).findAll();
     }
 
-    //PostMapping crea detalles asociados a Id pedido
     @Test
-    @DisplayName("Debe guardar los detalles del pedido")
-    void debeGuardarDetallesCorrectamente() {
+    @DisplayName("Debe guardar los detalles del pedido correctamente desde DTO")
+    void debeGuardarDetallesDesdeDTOCorrectamente() {
         Long idPedido = 100L;
         Long idSucursal = 1L;
+        Long idUsuario = 99L;
+        Long idProducto = 10L;
+        Long cantidad = 2L;
+        double precio = 2999.95;
 
-        // Crear detalle
-        DetallePedido detalle = new DetallePedido(null, idPedido, 10L, 2L, null);
-        List<DetallePedido> detalles = List.of(detalle);
+        // Crear DTO de entrada (como en Postman)
+        DetallePedidoRequestDTO dto = new DetallePedidoRequestDTO(idPedido, idProducto, cantidad);
+        List<DetallePedidoRequestDTO> listaDto = List.of(dto);
 
         // Mock pedido
-        Pedido pedido = new Pedido(100L, LocalDateTime.now(), 1000.0, 1L, idSucursal);
+        Pedido pedido = new Pedido(idPedido, LocalDateTime.now(), 1000.0, idUsuario, idSucursal);
         when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
 
-        // Mock producto
-        Producto producto = new Producto(10L, "Arroz", 2999.95);
-        when(productoClientRest.findByIdProducto(10L)).thenReturn(producto);
+        // Mock usuario
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(idUsuario);
+        usuario.setNombreDelUsuario("Juan Pérez");
+        when(usuarioClientRest.findByIdUsuario(idUsuario)).thenReturn(usuario);
 
-        // Mock inventarios
-        List<Inventario> inventarios = List.of(new Inventario(10L,10L, idSucursal, 10L));
+        // Mock sucursal
+        Sucursal sucursal = new Sucursal();
+        sucursal.setIdSucursal(idSucursal);
+        sucursal.setNombreSucursal("Sucursal Centro");
+        when(sucursalClientRest.findByIdSucursal(idSucursal)).thenReturn(sucursal);
+
+        // Mock producto
+        Producto producto = new Producto(idProducto, "Arroz", precio);
+        when(productoClientRest.findByIdProducto(idProducto)).thenReturn(producto);
+
+        // Mock inventario
+        List<Inventario> inventarios = List.of(new Inventario(10L, idProducto, idSucursal, 10L));
         when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
 
-        // Mock update inventario
+        // Mock actualización de inventario
         doNothing().when(inventarioClientRest).updateQuantity(any(QuantityUpdateDTO.class));
 
-        // Mock guardar
-        when(detallePedidoRepository.saveAll(anyList())).thenReturn(detalles);
+        // Mock guardado
+        DetallePedido detalleGuardado = new DetallePedido(1L, idPedido, idProducto, cantidad, cantidad * precio);
+        when(detallePedidoRepository.saveAll(anyList())).thenReturn(List.of(detalleGuardado));
 
         // Ejecutar
-        List<DetallePedido> resultado = detallePedidoService.save(detalles);
+        List<DetallePedidoResponseDTO> resultado = detallePedidoService.save(listaDto);
 
         // Verificaciones
-        assertThat(resultado).isNotEmpty();
-        assertThat(resultado.get(0).getSubTotal()).isEqualTo(2 * 2999.95);
+        assertThat(resultado).isNotNull();
+        assertThat(resultado).hasSize(1);
+
+        DetallePedidoResponseDTO dtoRespuesta = resultado.get(0);
+        assertThat(dtoRespuesta.getIdDetallePedido()).isEqualTo(1L);
+        assertThat(dtoRespuesta.getIdPedido()).isEqualTo(idPedido);
+        assertThat(dtoRespuesta.getCantidad()).isEqualTo(cantidad);
+        assertThat(dtoRespuesta.getPrecioUnitario()).isEqualTo(precio);
+        assertThat(dtoRespuesta.getSubTotal()).isEqualTo(precio * cantidad);
+        assertThat(dtoRespuesta.getNombreProducto()).isEqualTo("Arroz");
+        assertThat(dtoRespuesta.getNombreUsuario()).isEqualTo("Juan Pérez");
+        assertThat(dtoRespuesta.getNombreSucursal()).isEqualTo("Sucursal Centro");
+
+        // Verifica llamada a updateQuantity
+        ArgumentCaptor<QuantityUpdateDTO> captor = ArgumentCaptor.forClass(QuantityUpdateDTO.class);
+        verify(inventarioClientRest).updateQuantity(captor.capture());
+        QuantityUpdateDTO actualUpdate = captor.getValue();
+        assertThat(actualUpdate.getCantidad()).isEqualTo(-cantidad);
+
+        // Verifica que guardó los detalles
+        verify(detallePedidoRepository).saveAll(anyList());
     }
+
+
+
 
     //PostMapping crea detalles. Lanza Exception cuando no hay detalles de pedidos para guardar
     @Test
@@ -159,24 +248,32 @@ public class DetallePedidoServiceImplTest {
         verifyNoInteractions(detallePedidoRepository);
     }
 
-    //PostMapping crea detalles. Lanza Exception cuando la Id del pedido no existe
     @Test
     @DisplayName("Debe lanzar excepción si el pedido no existe")
     void debeLanzarExcepcionSiPedidoNoExiste() {
         Long idPedido = 100L;
-        List<DetallePedido> detalles = List.of(new DetallePedido(null, idPedido, 10L, 2L, null));
+        Long idProducto = 10L;
 
+        // DTO de entrada simulada (como desde Postman)
+        DetallePedidoRequestDTO dto = new DetallePedidoRequestDTO(idPedido, idProducto, 2L);
+        List<DetallePedidoRequestDTO> detallesDto = List.of(dto);
+
+        // Simular que el pedido no existe (Feign lanza excepción)
         when(pedidoClientRest.findById(idPedido)).thenThrow(FeignException.NotFound.class);
 
-        assertThatThrownBy(() -> detallePedidoService.save(detalles))
+        // Ejecutar y verificar que lanza la excepción esperada
+        assertThatThrownBy(() -> detallePedidoService.save(detallesDto))
                 .isInstanceOf(DetallePedidosException.class)
                 .hasMessageContaining("Pedido con id: 100 no existe");
 
+        // Verifica que se intentó buscar el pedido
         verify(pedidoClientRest).findById(idPedido);
+
+        // Asegura que NO se intentó guardar nada
         verifyNoInteractions(detallePedidoRepository);
     }
 
-    //PostMapping crea detalles. Lanza Exception cuando la Id del producto no existe o no esta asociado al inventario de la id sucursal
+
     @Test
     @DisplayName("Debe lanzar excepción si producto no existe en inventario")
     void debeLanzarExcepcionSiProductoNoExisteEnInventario() {
@@ -184,62 +281,109 @@ public class DetallePedidoServiceImplTest {
         Long idSucursal = 1L;
         Long idProducto = 10L;
 
-        List<DetallePedido> detalles = List.of(new DetallePedido(null, idPedido, idProducto, 2L, null));
+        // DTO simulado que llega desde Postman
+        DetallePedidoRequestDTO dto = new DetallePedidoRequestDTO(idPedido, idProducto, 2L);
+        List<DetallePedidoRequestDTO> detallesDto = List.of(dto);
 
+        // Mock: el pedido existe
         Pedido pedido = new Pedido(idPedido, LocalDateTime.now(), 1000.0, 1L, idSucursal);
         when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
-        when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(List.of()); // vacío
 
-        assertThatThrownBy(() -> detallePedidoService.save(detalles))
+        // Mock: inventario vacío, el producto no está registrado en esta sucursal
+        when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(List.of());
+
+        // Verificación: se lanza excepción porque el producto no está en inventario
+        assertThatThrownBy(() -> detallePedidoService.save(detallesDto))
                 .isInstanceOf(DetallePedidosException.class)
                 .hasMessageContaining("No existe el producto con id: 10");
 
+        // Verifica que no se intentó guardar nada
         verify(detallePedidoRepository, never()).saveAll(anyList());
     }
 
-    //PutMapping actualiza detalles asociados la id producto
+
     @Test
-    @DisplayName("Debe actualizar la cantidad de producto cuando hay stock")
+    @DisplayName("Debe actualizar la cantidad de producto cuando hay stock suficiente (caso de aumento)")
     void debeActualizarCantidadProductoCuandoHayStockSuficiente() {
         // Datos de prueba
         Long idDetalle = 1L;
         Long idPedido = 100L;
         Long idProducto = 10L;
         Long idSucursal = 1L;
+        Long idUsuario = 99L;
 
-        UpdateQuantidadProductoPedidoDTO updateDTO = new UpdateQuantidadProductoPedidoDTO();
-        updateDTO.setCantidad(2L);
+        UpdateCuantidadProductoDetallePedidoDTO updateDTO = new UpdateCuantidadProductoDetallePedidoDTO();
+        updateDTO.setCantidad(3L); // quiere aumentar de 1 a 3
 
-        // DetallePedido inicial con cantidad 1 y subtotal 1000
-        DetallePedido detallePedido = new DetallePedido(idDetalle, idPedido, idProducto, 1L, 1000.0);
+        // Entidad original con cantidad = 1
+        DetallePedido detallePedido = new DetallePedido(idDetalle, idPedido, idProducto, 1L, 500.0); // subtotal actual 500
 
-        // Pedido asociado al detalle con idSucursal = 1
-        Pedido pedido = new Pedido(idPedido, LocalDateTime.now(), 5000.0, 1L, idSucursal);
+        Pedido pedido = new Pedido(idPedido, LocalDateTime.now(), 5000.0, idUsuario, idSucursal);
 
-        // Inventario en sucursal con suficiente stock (5 unidades)
-        List<Inventario> inventarios = List.of(new Inventario(10L, idProducto, idSucursal, 5L));
+        // Faker para datos ficticios
+        Faker faker = new Faker(new Locale("es"));
 
-        // Producto con precio 500
+        Usuario usuario = new Usuario(
+                idUsuario,
+                faker.name().username(),
+                faker.internet().password(),
+                "Juan Perez",
+                faker.internet().emailAddress(),
+                faker.idNumber().valid(),
+                faker.address().fullAddress(),
+                faker.phoneNumber().phoneNumber()
+        );
+
+        Sucursal sucursal = new Sucursal(
+                idSucursal,
+                "Sucursal Centro",
+                faker.address().streetAddress(),
+                faker.address().city(),
+                faker.address().state(),
+                faker.address().stateAbbr(),
+                faker.phoneNumber().cellPhone(),
+                faker.internet().emailAddress()
+        );
+
         Producto producto = new Producto(idProducto, "Arroz", 500.0);
+
+        // Inventario con suficiente stock (5 unidades)
+        List<Inventario> inventarios = List.of(new Inventario(10L, idProducto, idSucursal, 5L));
 
         // Mockeos
         when(detallePedidoRepository.findById(idDetalle)).thenReturn(Optional.of(detallePedido));
         when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
-        when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
+        when(usuarioClientRest.findByIdUsuario(idUsuario)).thenReturn(usuario);
+        when(sucursalClientRest.findByIdSucursal(idSucursal)).thenReturn(sucursal);
         when(productoClientRest.findByIdProducto(idProducto)).thenReturn(producto);
-        when(detallePedidoRepository.save(any(DetallePedido.class))).thenAnswer(i -> i.getArgument(0));
+        when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
+        when(detallePedidoRepository.save(any(DetallePedido.class))).thenAnswer(invoc -> invoc.getArgument(0));
         doNothing().when(inventarioClientRest).updateQuantity(any(QuantityUpdateDTO.class));
 
         // Ejecución del método
-        String resultado = detallePedidoService.updateCatidadProductoPedido(idDetalle, updateDTO);
+        UpdateCuantidadProductoDetallePedidoResponseDTO resultado = detallePedidoService
+                .updateCantidadProductoPedido(idDetalle, updateDTO);
 
-        // Validaciones
-        assertThat(resultado).contains("cantidad=3");    // Cantidad actualizada: 1 + 2 = 3
-        assertThat(resultado).contains("subTotal=1500.0"); // subtotal actualizado: 3 * 500
+        // Verificaciones
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getCantidad()).isEqualTo(3L); // actualizado correctamente
+        assertThat(resultado.getSubTotal()).isEqualTo(1500.0); // 3 * 500
+        assertThat(resultado.getNombreProducto()).isEqualTo("Arroz");
+        assertThat(resultado.getNombreSucursal()).isEqualTo("Sucursal Centro");
+        assertThat(resultado.getNombreUsuario()).isEqualTo("Juan Perez");
 
-        verify(inventarioClientRest).updateQuantity(any(QuantityUpdateDTO.class));
+        // Captura la llamada a updateQuantity para verificar la diferencia
+        ArgumentCaptor<QuantityUpdateDTO> captor = ArgumentCaptor.forClass(QuantityUpdateDTO.class);
+        verify(inventarioClientRest).updateQuantity(captor.capture());
+        QuantityUpdateDTO update = captor.getValue();
+        assertThat(update.getCantidad()).isEqualTo(-2L); // diferencia entre 3 nueva y 1 actual
+
+
+        // Verifica que se guardó el detalle actualizado
         verify(detallePedidoRepository).save(any(DetallePedido.class));
     }
+
+
 
     //PutMapping actualiza detalles. Lanza Exception si intenta actualizar detalles de un ID que no existe
     @Test
@@ -249,14 +393,14 @@ public class DetallePedidoServiceImplTest {
         Long idDetalle = 999L;
 
         // DTO con cualquier cantidad
-        UpdateQuantidadProductoPedidoDTO dto = new UpdateQuantidadProductoPedidoDTO();
+        UpdateCuantidadProductoDetallePedidoDTO dto = new UpdateCuantidadProductoDetallePedidoDTO();
         dto.setCantidad(2L);
 
         // Simula que no se encuentra el detalle
         when(detallePedidoRepository.findById(idDetalle)).thenReturn(Optional.empty());
 
         // Ejecutar y validar excepción
-        assertThatThrownBy(() -> detallePedidoService.updateCatidadProductoPedido(idDetalle, dto))
+        assertThatThrownBy(() -> detallePedidoService.updateCantidadProductoPedido(idDetalle, dto))
                 .isInstanceOf(DetallePedidosException.class)
                 .hasMessageContaining("No existe el producto de id: " + idDetalle);
 
@@ -277,7 +421,7 @@ public class DetallePedidoServiceImplTest {
         Long idProducto = 10L;
         Long idSucursal = 1L;
 
-        UpdateQuantidadProductoPedidoDTO updateDTO = new UpdateQuantidadProductoPedidoDTO();
+        UpdateCuantidadProductoDetallePedidoDTO updateDTO = new UpdateCuantidadProductoDetallePedidoDTO();
         updateDTO.setCantidad(5L); // Se quiere agregar 5
 
         // DetallePedido actual tiene cantidad 1 y subtotal 1000
@@ -295,7 +439,7 @@ public class DetallePedidoServiceImplTest {
         when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
 
         // Verificar excepción
-        assertThatThrownBy(() -> detallePedidoService.updateCatidadProductoPedido(idDetalle, updateDTO))
+        assertThatThrownBy(() -> detallePedidoService.updateCantidadProductoPedido(idDetalle, updateDTO))
                 .isInstanceOf(DetallePedidosException.class)
                 .hasMessageContaining("No hay suficientes stock del producto con id: " + idProducto);
 

@@ -9,18 +9,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
     @Bean
-    public OpenAPI customOpenAPI(){
+    public OpenAPI customOpenAPI() {
         Contact contact = new Contact();
-        contact.setName("Matheus de L.A");
-        contact.setEmail("ma.delira@gmail.com");
+        contact.setName("De Lara");
+        contact.setEmail("ma.delara@duocuc.cl");
         return new OpenAPI()
                 .info(new Info()
                         .title("API - MSVC - Pedidos")
                         .version("1.0.0")
                         .description("Este es el microservicio de Pedidos, con el puedes realizar todas las consultas" +
-                                " CRUD que necesites")
+                                "CRUD que necesitas")
                         .contact(contact)
-                        .summary("esto es una api dentro de un proyecto de MSVC")
+                        .termsOfService("JAVA CLASS IN PREPARE TO DIE")
+                        .summary("Esta es una API dentro de un proyecto de MSVC")
                 );
+
     }
 }

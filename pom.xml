@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
     <modules>                            <!--ADD PORTS HERE -->
         <module>msvc-inventario</module> <!-- port= 8081 -->
-        <module>msvc-sucursal</module>   <!-- port= 8082 -->
+        <module>msvc-sucursal</module>   <!-- port= 8089 -->
         <module>msvc-products</module>   <!-- port= 8083 -->
         <module>msvc-usuarios</module>   <!-- port= 8084 -->
         <module>msvc-pedidos</module>    <!-- port= 8085 -->
