@@ -38,6 +38,96 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
     @Autowired
     SucursalClientRest sucursalClientRest;
 
+
+
+    @Transactional
+    @Override
+    public List<DetallePedido> findByIdPedido(Long idPedido) {
+        List<DetallePedido> detalles = detallePedidoRepository.findByIdPedido(idPedido);
+        if (detalles.isEmpty()) {
+            throw new DetallePedidosException("No se encontraron detalles para el pedido con ID: " + idPedido);
+        }
+        return detalles;
+    }
+
+    @Override
+    public List<DetallePedidoResponseDTO> findDetailsByIdPedido(Long idPedido) {
+        List<DetallePedido> detalles = detallePedidoRepository.findByIdPedido(idPedido);
+        if (detalles.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron detalles para el pedido con ID: " + idPedido);
+        }
+
+        List<DetallePedidoResponseDTO> dtos = new ArrayList<>();
+
+        for (DetallePedido detalle : detalles) {
+            Pedido pedido = pedidoClientRest.findById(detalle.getIdPedido());
+            if (pedido == null) {
+                throw new ResourceNotFoundException("No se encontró el pedido con ID: " + detalle.getIdPedido());
+            }
+
+            Usuario usuario = usuarioClientRest.findByIdUsuario(pedido.getIdUsuario());
+            Sucursal sucursal = sucursalClientRest.findByIdSucursal(pedido.getIdSucursal());
+            Producto producto = productoClientRest.findByIdProducto(detalle.getIdProducto());
+
+            if (usuario == null || sucursal == null || producto == null) {
+                throw new ResourceNotFoundException("Faltan datos relacionados al pedido (usuario, sucursal o producto)");
+            }
+
+            DetallePedidoResponseDTO dto = DetallePedidoResponseDTO.builder()
+                    .idDetallePedido(detalle.getIdDetallePedido())
+                    .idPedido(detalle.getIdPedido())
+                    .nombreUsuario(usuario.getNombreUsuario())
+                    .nombreSucursal(sucursal.getNombreSucursal())
+                    .nombreProducto(producto.getNombreProducto())
+                    .cantidad(detalle.getCantidad())
+                    .precioUnitario(producto.getPrecio())
+                    .subTotal(detalle.getSubTotal())
+                    .build();
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+
+
+    @Transactional
+    @Override
+    public List<DetallePedido> findAll(){
+        return detallePedidoRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DetallePedidoResponseDTO> findAllDetallesDTO() {
+        List<DetallePedido> detalles = detallePedidoRepository.findAll();
+
+        List<DetallePedidoResponseDTO> dtos = new ArrayList<>();
+
+        for (DetallePedido detalle : detalles) {
+            Pedido pedido = pedidoClientRest.findById(detalle.getIdPedido());
+            Usuario usuario = usuarioClientRest.findByIdUsuario(pedido.getIdUsuario());
+            Sucursal sucursal = sucursalClientRest.findByIdSucursal(pedido.getIdSucursal());
+            Producto producto = productoClientRest.findByIdProducto(detalle.getIdProducto());
+
+            DetallePedidoResponseDTO dto = DetallePedidoResponseDTO.builder()
+                    .idDetallePedido(detalle.getIdDetallePedido())
+                    .idPedido(detalle.getIdPedido())
+                    .nombreUsuario(usuario.getNombreUsuario())
+                    .nombreSucursal(sucursal.getNombreSucursal())
+                    .nombreProducto(producto.getNombreProducto())
+                    .cantidad(detalle.getCantidad())
+                    .precioUnitario(producto.getPrecio())
+                    .subTotal(detalle.getSubTotal())
+                    .build();
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
     @Transactional
     @Override
     public List<DetallePedidoResponseDTO> save(List<DetallePedidoRequestDTO> detallePedidosDto) {
@@ -106,6 +196,7 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
                     .nombreUsuario(usuario.getNombreDelUsuario())
                     .nombreSucursal(sucursal.getNombreSucursal())
                     .nombreProducto(producto.getNombreProducto())
+                    .idProducto(producto.getIdProducto())
                     .cantidad(d.getCantidad())
                     .precioUnitario(producto.getPrecio())
                     .subTotal(d.getSubTotal())
@@ -114,64 +205,6 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
         }
 
         return responseList;
-    }
-
-    @Transactional
-    @Override
-    public List<DetallePedido> findByIdPedido(Long idPedido) {
-        List<DetallePedido> detalles = detallePedidoRepository.findByIdPedido(idPedido);
-        if (detalles.isEmpty()) {
-            throw new DetallePedidosException("No se encontraron detalles para el pedido con ID: " + idPedido);
-        }
-        return detalles;
-    }
-
-    @Override
-    public List<DetallePedidoResponseDTO> findDetailsByIdPedido(Long idPedido) {
-        List<DetallePedido> detalles = detallePedidoRepository.findByIdPedido(idPedido);
-        if (detalles.isEmpty()) {
-            throw new ResourceNotFoundException("No se encontraron detalles para el pedido con ID: " + idPedido);
-        }
-
-        List<DetallePedidoResponseDTO> dtos = new ArrayList<>();
-
-        for (DetallePedido detalle : detalles) {
-            Pedido pedido = pedidoClientRest.findById(detalle.getIdPedido());
-            if (pedido == null) {
-                throw new ResourceNotFoundException("No se encontró el pedido con ID: " + detalle.getIdPedido());
-            }
-
-            Usuario usuario = usuarioClientRest.findByIdUsuario(pedido.getIdUsuario());
-            Sucursal sucursal = sucursalClientRest.findByIdSucursal(pedido.getIdSucursal());
-            Producto producto = productoClientRest.findByIdProducto(detalle.getIdProducto());
-
-            if (usuario == null || sucursal == null || producto == null) {
-                throw new ResourceNotFoundException("Faltan datos relacionados al pedido (usuario, sucursal o producto)");
-            }
-
-            DetallePedidoResponseDTO dto = DetallePedidoResponseDTO.builder()
-                    .idDetallePedido(detalle.getIdDetallePedido())
-                    .idPedido(detalle.getIdPedido())
-                    .nombreUsuario(usuario.getNombreUsuario())
-                    .nombreSucursal(sucursal.getNombreSucursal())
-                    .nombreProducto(producto.getNombreProducto())
-                    .cantidad(detalle.getCantidad())
-                    .precioUnitario(producto.getPrecio())
-                    .subTotal(detalle.getSubTotal())
-                    .build();
-
-            dtos.add(dto);
-        }
-
-        return dtos;
-    }
-
-
-
-    @Transactional
-    @Override
-    public List<DetallePedido> findAll(){
-        return detallePedidoRepository.findAll();
     }
 
     @Transactional

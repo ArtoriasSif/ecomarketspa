@@ -13,20 +13,13 @@ import lombok.*;
         example = "[{\"idDetallePedido\":1,\"idPedido\":2,\"nombreUsuario\":\"Juan\",\"nombreSucursal\":\"Central\",\"nombreProducto\":\"Mouse\",\"cantidad\":3,\"precioUnitario\":15.5,\"subTotal\":46.5}]"
 )
 public class DetallePedidoResponseDTO {
-
     private Long idDetallePedido;
-
     private Long idPedido;
-
+    private Long idProducto;
     private String nombreUsuario;
-
     private String nombreSucursal;
-
     private String nombreProducto;
-
     private Long cantidad;
-
     private Double precioUnitario;
-
     private Double subTotal;
 }

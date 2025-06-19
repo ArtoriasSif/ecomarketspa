@@ -16,5 +16,6 @@ public interface DetallePedidoService {
     List<DetallePedidoResponseDTO> findDetailsByIdPedido(Long idPedido);
     UpdateCuantidadProductoDetallePedidoResponseDTO updateCantidadProductoPedido (Long idDetallePedido, UpdateCuantidadProductoDetallePedidoDTO updateDTO);
     List<DetallePedido> findAll();
+    List<DetallePedidoResponseDTO> findAllDetallesDTO();
 
 }
