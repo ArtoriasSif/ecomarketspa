@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Component
@@ -27,15 +29,18 @@ public class LoadDatabase implements CommandLineRunner {
             int maxProductoId = 50;
             Long[] sucursales = {1L, 2L, 3L};
 
+            List<Inventory> inventarios = new ArrayList<>();
+
             for (long productoId = 1; productoId <= maxProductoId; productoId++) {
                 for (Long sucursalId : sucursales) {
-                    long cantidad = random.nextInt(301); // 0 a 300 unidades
+                    long cantidad = 200 + random.nextInt(251); // entre 50 y 300 para evitar 0 stock
 
                     Inventory inventario = new Inventory(null, productoId, sucursalId, cantidad);
-                    inventoryRepository.save(inventario);
+                    inventarios.add(inventario);
                     log.info("Creado inventario: ProductoId={} SucursalId={} Cantidad={}", productoId, sucursalId, cantidad);
                 }
             }
+            inventoryRepository.saveAll(inventarios);
         }
     }
 }

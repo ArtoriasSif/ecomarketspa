@@ -30,7 +30,7 @@ public class LoadDatabase implements CommandLineRunner {
         Long[] sucursales = {1L, 2L, 3L}; // IDs ficticios de sucursal
 
         if (pedidoRepository.count() == 0) {
-            for (int i = 1; i <= 100; i++) {
+            for (int i = 1; i <= 50; i++) {  // <-- 50 usuarios
                 Pedido pedido = new Pedido();
 
                 pedido.setIdUsuario((long) i);

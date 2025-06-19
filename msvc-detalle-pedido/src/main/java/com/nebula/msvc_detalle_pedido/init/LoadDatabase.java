@@ -26,23 +26,22 @@ public class LoadDatabase implements CommandLineRunner {
         if (detallePedidoRepository.count() == 0) {
             Random random = new Random();
 
-            // Precios reales según tus productos
-            Map<Long, Double> precios = Map.of(
-                    1L, 2500.0,
-                    2L, 4000.0,
-                    3L, 6640.0
-            );
+            // Generar precios para productos del 1 al 50
+            Map<Long, Double> precios = new HashMap<>();
+            for (long idProducto = 1; idProducto <= 50; idProducto++) {
+                // Precio random entre 1000 y 10000
+                precios.put(idProducto, 1000.0 + random.nextInt(9001));
+            }
 
-            // Supón que ya existen pedidos con ID del 1 al 10
-            for (long idPedido = 1; idPedido <= 10; idPedido++) {
+            for (long idPedido = 1; idPedido <= 50; idPedido++) {
                 List<Long> productos = new ArrayList<>(precios.keySet());
-                Collections.shuffle(productos); // para variar el orden
+                Collections.shuffle(productos);
 
-                int cantidadItems = random.nextInt(3) + 1; // 1 a 3 productos por pedido
+                int cantidadItems = random.nextInt(5) + 1; // 1 a 5 productos por pedido
 
                 for (int i = 0; i < cantidadItems; i++) {
                     Long idProducto = productos.get(i);
-                    Long cantidad = (long) (random.nextInt(3) + 1); // 1 a 3 unidades
+                    Long cantidad = (long) (random.nextInt(5) + 1); // 1 a 5 unidades
                     Double precio = precios.get(idProducto);
                     Double subTotal = cantidad * precio;
 
