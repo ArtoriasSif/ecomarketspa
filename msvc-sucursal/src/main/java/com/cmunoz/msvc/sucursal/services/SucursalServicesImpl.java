@@ -98,4 +98,12 @@ public class SucursalServicesImpl implements SucursalService {
         SucursalRepository.save(sucursalUpdate);
         return "La sucursal con id: " + id + " se actualizo exitosamente";
     }
+
+    public SucursalServicesImpl(SucursalRepository sucursalRepository,
+                                SucursalClientRest sucursalClientRest,
+                                PedidoClientRest pedidoClientRest) {
+        this.SucursalRepository = sucursalRepository;
+        this.sucursalClientRest = sucursalClientRest;
+        this.pedidoClientRest = pedidoClientRest;
+    }
 }
