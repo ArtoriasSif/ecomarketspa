@@ -1,5 +1,6 @@
 package com.cmunoz.msvc.sucursal.services;
 
+import com.cmunoz.msvc.sucursal.exception.SucursalException;
 import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.client.SucursalClientRest;
 import com.cmunoz.msvc.sucursal.client.PedidoClientRest;
@@ -28,6 +29,11 @@ public class SucursalServicesImplTest {
 
     @Mock
     private SucursalRepository sucursalRepository;
+    @Mock
+    private SucursalClientRest sucursalClientRest;
+    @Mock
+    private PedidoClientRest pedidoClientRest;
+
 
     @InjectMocks
     private SucursalServicesImpl sucursalServices;
@@ -36,6 +42,11 @@ public class SucursalServicesImplTest {
 
     @BeforeEach
     public void setUp(){
+        sucursalServices = new SucursalServicesImpl(
+                sucursalRepository,
+                sucursalClientRest,
+                pedidoClientRest
+        );
         this.sucursalPrueba = new Sucursal(
                 "Sucursal Lastarria", "Lastarria 1234", "Santiago", "Santiago", "Metropolitana", "+56991234567", "lastarria@marketspaeco.cl"
         );
@@ -98,15 +109,132 @@ public class SucursalServicesImplTest {
 
     @Test
     public void deleteByIdSucursal() {
-        doNothing().when(sucursalServices).deleteByIdSucursal(Long.valueOf(1L));
-        sucursalServices.deleteByIdSucursal(Long.valueOf(1L));
-        verify(sucursalServices, times(1)).deleteByIdSucursal(Long.valueOf(1L));
+        Long idSucursal = 1L;
+
+        Sucursal mockSucursal = new Sucursal();
+        mockSucursal.setIdSucursal(idSucursal);
+
+        Inventario inventario = new Inventario();
+        inventario.setIdInventario(100L);
+        List<Inventario> inventarios = List.of(inventario);
+
+        when(sucursalRepository.findById(idSucursal)).thenReturn(Optional.of(mockSucursal));
+        when(sucursalClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
+
+        doNothing().when(sucursalClientRest).updateInventory(100L);
+        doNothing().when(sucursalClientRest).deleteInventoryById(100L);
+        doNothing().when(pedidoClientRest).deletePedidoSucursal(idSucursal);
+        doNothing().when(sucursalRepository).deleteById(idSucursal);
+
+
+        String result = sucursalServices.deleteByIdSucursal(idSucursal);
+
+
+        assertEquals("Sucursal eliminada con éxito", result);
+        verify(sucursalRepository).findById(idSucursal);
+        verify(sucursalClientRest).findByIdSucursal(idSucursal);
+        verify(sucursalClientRest).updateInventory(100L);
+        verify(sucursalClientRest).deleteInventoryById(100L);
+        verify(pedidoClientRest).deletePedidoSucursal(idSucursal);
+        verify(sucursalRepository).deleteById(idSucursal);
+
 
     }
 
     @Test
     public void updateByIdSucursal() {
-        when(sucursalServices.updateByIdSucursal(Long.valueOf(1L), sucursalPrueba));
+        // Arrange
+        Long idSucursal = 1L;
 
+        Sucursal existente = new Sucursal();
+        existente.setIdSucursal(idSucursal);
+        existente.setNombreSucursal("Sucursal Antiguo Nombre");
+        existente.setDireccionSucursal("Antigua Dirección");
+
+        Sucursal actualizado = new Sucursal();
+        actualizado.setNombreSucursal("Sucursal Nueva");
+        actualizado.setDireccionSucursal("Nueva Dirección");
+        actualizado.setTelefonoSucursal("+56999999999");
+        actualizado.setCiudadSucursal("Nueva Ciudad");
+        actualizado.setProvinciaSucursal("Nueva Provincia");
+        actualizado.setRegionSucursal("Nueva Región");
+        actualizado.setEmailSucursal("nueva@sucursal.cl");
+
+
+        when(sucursalRepository.findById(idSucursal)).thenReturn(Optional.of(existente));
+        when(sucursalRepository.save(any(Sucursal.class))).thenReturn(existente);
+
+
+        String resultado = sucursalServices.updateByIdSucursal(idSucursal, actualizado);
+
+
+        assertEquals("La sucursal con id: 1 se actualizo exitosamente", resultado);
+        verify(sucursalRepository, times(2)).findById(idSucursal); // <-- clave
+        verify(sucursalRepository).save(any(Sucursal.class));
+    }
+
+    @Test
+    public void updateByIdSucursal_sucursalNoExiste_lanzaExcepcion() {
+        Long idSucursal = 99L;
+        Sucursal dummy = new Sucursal();
+
+        when(sucursalRepository.findById(idSucursal)).thenReturn(Optional.empty());
+
+        SucursalException excepcion = assertThrows(SucursalException.class, () -> {
+            sucursalServices.updateByIdSucursal(idSucursal, dummy);
+        });
+
+        assertEquals("No se encontro la sucursal con id: 99", excepcion.getMessage());
+        verify(sucursalRepository, times(1)).findById(idSucursal);
+        verify(sucursalRepository, never()).save(any());
+    }
+
+    @Test
+    public void findByIdSucursal_sucursalNoExiste_lanzaExcepcion() {
+
+        Long idSucursalNoExistente = 99L;
+        when(sucursalRepository.findById(idSucursalNoExistente)).thenReturn(Optional.empty());
+
+
+        SucursalException exception = assertThrows(SucursalException.class, () -> {
+            sucursalServices.findByIdSucursal(idSucursalNoExistente);
+        });
+
+        assertEquals("No se encontro la sucursal con id: " + idSucursalNoExistente, exception.getMessage());
+        verify(sucursalRepository, times(1)).findById(idSucursalNoExistente);
+    }
+
+    @Test
+    public void findByNombreSucursal_sucursalNoExiste_lanzaExcepcion() {
+
+        String nombreNoExistente = "Sucursal Inexistente";
+        when(sucursalRepository.findByNombreSucursal(nombreNoExistente)).thenReturn(Optional.empty());
+
+
+        SucursalException exception = assertThrows(SucursalException.class, () -> {
+            sucursalServices.findByNombreSucursal(nombreNoExistente);
+        });
+
+
+        assertEquals("No se encontro la sucursal con nombre: " + nombreNoExistente, exception.getMessage());
+        verify(sucursalRepository, times(1)).findByNombreSucursal(nombreNoExistente);
+
+    }
+
+    @Test
+    public void deleteByIdSucursal_sucursalNoExiste_lanzaExcepcion() {
+
+        Long idNoExistente = 99L;
+        when(sucursalRepository.findById(idNoExistente)).thenReturn(Optional.empty());
+
+
+        SucursalException exception = assertThrows(SucursalException.class, () -> {
+            sucursalServices.deleteByIdSucursal(idNoExistente);
+        });
+
+        assertEquals("No se encontro la sucursal con id: " + idNoExistente, exception.getMessage());
+        verify(sucursalRepository, times(1)).findById(idNoExistente);
+        verify(sucursalClientRest, never()).findByIdSucursal(anyLong()); // Asegura que no se llamaron a los clientes
+        verify(sucursalRepository, never()).deleteById(anyLong()); // Asegura que no se intentó eliminar
     }
 }
