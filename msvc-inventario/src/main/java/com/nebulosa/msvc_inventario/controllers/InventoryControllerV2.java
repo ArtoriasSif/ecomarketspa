@@ -1,10 +1,12 @@
 package com.nebulosa.msvc_inventario.controllers;
 
 
+import com.nebulosa.msvc_inventario.assemblers.InventoryEntityModelAssembler;
+import com.nebulosa.msvc_inventario.assemblers.InventoryResponseDTOAssembler;
 import com.nebulosa.msvc_inventario.dtos.ErrorDTO;
-import com.nebulosa.msvc_inventario.dtos.InventoryDTO;
 import com.nebulosa.msvc_inventario.dtos.InventoryResponseDTO;
 import com.nebulosa.msvc_inventario.dtos.QuantityUpdateDTO;
+import com.nebulosa.msvc_inventario.exceptions.InventoryException;
 import com.nebulosa.msvc_inventario.models.entities.Inventory;
 import com.nebulosa.msvc_inventario.services.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,33 +18,44 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/api/v1/inventario")
-@Validated
-@Tag(name = "Inventario", description = "Operaciones relacionadas con el inventario")
-public class InventoryController {
+    @RequestMapping("/api/v2/inventario")
+    @Tag(name = "Inventario V2", description = "Operaciones con inventario con soporte HATEOAS")
+    public class InventoryControllerV2 {
 
     @Autowired
     private InventoryService inventoryService;
 
+    @Autowired
+    private InventoryEntityModelAssembler inventoryEntityModelAssembler;
+
+    @Autowired
+    private InventoryResponseDTOAssembler inventoryResponseDTOAssembler;
+
     @GetMapping("/{id}")
     @Operation(
             summary = "Obtiene inventario con nombre del producto y sucursal",
-            description = "Devuelve el inventario con el nombre del producto y sucursal asociado"
+            description = "Devuelve el inventario con el nombre del producto y sucursal asociado, incluyendo enlaces HATEOAS"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Inventario encontrado",
-                    content = @Content(schema = @Schema(implementation = InventoryDTO.class))
+                    content = @Content(schema = @Schema(implementation = InventoryResponseDTO.class))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -51,21 +64,25 @@ public class InventoryController {
             )
     })
     @Parameter(name = "id", description = "ID del inventario", required = true, example = "1")
-    public ResponseEntity<InventoryResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(inventoryService.findById(id));
+    public ResponseEntity<EntityModel<InventoryResponseDTO>> findById(@PathVariable Long id) {
+        InventoryResponseDTO dto = inventoryService.findById(id);
+        EntityModel<InventoryResponseDTO> resource = inventoryResponseDTOAssembler.toModel(dto);
+        return ResponseEntity.ok(resource);
     }
-
 
     @GetMapping
     @Operation(
             summary = "Listar todo el inventario",
-            description = "Devuelve una lista con todos los registros de inventario disponibles"
+            description = "Devuelve una lista con todos los registros de inventario disponibles (entidad pura)"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Inventario encontrado",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryDTO.class)))
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = Inventory.class))
+                    )
             )
     })
     public ResponseEntity<List<Inventory>> findAll() {
@@ -81,25 +98,35 @@ public class InventoryController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Inventario listado exitosamente",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class)))
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No se encontraron inventarios",
+                    content = @Content(schema = @Schema(implementation = ErrorDTO.class))
             )
     })
     public ResponseEntity<List<InventoryResponseDTO>> findAllWithDetails() {
         List<InventoryResponseDTO> inventarios = inventoryService.findAllWithDetails();
+        if (inventarios.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(inventarios);
     }
-
 
     @GetMapping("/sucursal/{idSucursal}")
     @Operation(
             summary = "Buscar inventario por ID de sucursal",
-            description = "Devuelve una lista del inventario en la sucursal indicada, incluyendo nombres del producto y sucursal"
+            description = "Devuelve una lista del inventario en la sucursal indicada con enlaces HATEOAS"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Inventario encontrado",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class)))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Inventory.class)))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -107,15 +134,21 @@ public class InventoryController {
                     content = @Content(schema = @Schema(implementation = ErrorDTO.class))
             )
     })
-    @Parameter(
-            name = "idSucursal",
-            description = "ID de la sucursal para buscar inventario",
-            required = true
-    )
-    public ResponseEntity<List<Inventory>> findByIdSucursal(@PathVariable Long idSucursal) {
-        List<Inventory> inventario = inventoryService.findByIdSucursal(idSucursal);
-        // No retornar 404 si la lista está vacía
-        return ResponseEntity.ok(inventario);
+    public ResponseEntity<CollectionModel<EntityModel<Inventory>>> findByIdSucursal(@PathVariable Long idSucursal) {
+        List<Inventory> inventarios = inventoryService.findByIdSucursal(idSucursal);
+
+        if (inventarios.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<EntityModel<Inventory>> recursos = inventarios.stream()
+                .map(inventoryEntityModelAssembler::toModel)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Inventory>> collectionModel = CollectionModel.of(recursos,
+                linkTo(methodOn(InventoryControllerV2.class).findByIdSucursal(idSucursal)).withSelfRel());
+
+        return ResponseEntity.ok(collectionModel);
     }
 
     @PostMapping
@@ -127,7 +160,10 @@ public class InventoryController {
             @ApiResponse(
                     responseCode = "201",
                     description = "Inventario creado correctamente",
-                    content = @Content(schema = @Schema(implementation = InventoryResponseDTO.class))
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = InventoryResponseDTO.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -145,10 +181,17 @@ public class InventoryController {
             required = true,
             schema = @Schema(implementation = Inventory.class)
     )
-    public ResponseEntity<InventoryResponseDTO> createInventory(@Validated @RequestBody Inventory inventory){
-        return ResponseEntity
-                .status(201)
-                .body(inventoryService.save(inventory));
+    public ResponseEntity<EntityModel<InventoryResponseDTO>> createInventory(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del inventario a crear",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Inventory.class))
+            )
+            @Validated @RequestBody Inventory inventory) {
+
+        InventoryResponseDTO dto = inventoryService.save(inventory);
+        EntityModel<InventoryResponseDTO> resource = inventoryResponseDTOAssembler.toModel(dto);
+        return ResponseEntity.status(201).body(resource);
     }
 
     @Operation(
@@ -173,9 +216,9 @@ public class InventoryController {
             )
     })
     @PutMapping("/actualizar")
-    public ResponseEntity<?> updateQuantity(@RequestBody QuantityUpdateDTO dto ){
-        return ResponseEntity
-                .ok(inventoryService.updateQuantity(dto.getProductoId(), dto.getSucursalId(), dto.getCantidad()));
+    public ResponseEntity<Inventory> updateQuantity(@RequestBody @Validated QuantityUpdateDTO dto) {
+        Inventory updatedInventory = inventoryService.updateQuantity(dto.getProductoId(), dto.getSucursalId(), dto.getCantidad());
+        return ResponseEntity.ok(updatedInventory);
     }
 
 
@@ -203,10 +246,11 @@ public class InventoryController {
     )
     public ResponseEntity<InventoryResponseDTO> updateInventory(@PathVariable Long id) {
         InventoryResponseDTO response = inventoryService.updateInventory(id);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(response);
     }
-
-
 
     @Operation(
             summary = "Eliminar inventario por ID",
@@ -214,9 +258,8 @@ public class InventoryController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "Inventario eliminado exitosamente",
-                    content = @Content(mediaType = "text/plain")
+                    responseCode = "204",
+                    description = "Inventario eliminado exitosamente"
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -231,14 +274,14 @@ public class InventoryController {
             example = "1"
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteInventoryById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteInventoryById(@PathVariable Long id) {
         try {
             inventoryService.deleteById(id);
-            return ResponseEntity.status(200)
-                    .body("Inventario eliminado exitosamente");
-        } catch (Exception ex) {
-            return ResponseEntity.status(404)
-                    .body(ex.getMessage());
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (InventoryException ex) {
+            return ResponseEntity.status(404).build();
         }
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.nebulosa.msvc_inventario.services;
 
 import com.nebulosa.msvc_inventario.clients.ProductoClientRest;
 import com.nebulosa.msvc_inventario.clients.SucursalClientRest;
+import com.nebulosa.msvc_inventario.dtos.InventoryResponseDTO;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
 import com.nebulosa.msvc_inventario.models.Product;
 import com.nebulosa.msvc_inventario.models.Sucursal;
@@ -75,20 +76,39 @@ public class InventarioServiceTest {
     }
 
     @Test
-    @DisplayName("Debe retornar inventario desde la lista cuando existe")
-    void debeRetornarInventarioDesdeLista() {
-        Inventory inventario = inventarios.get(0); // el primero de la lista
+    @DisplayName("Debe retornar InventoryResponseDTO desde la lista cuando existe")
+    void debeRetornarInventoryResponseDTODesdeLista() {
+        Inventory inventario = inventarios.get(0); // El primero de la lista
         Long id = inventario.getIdInventario();
 
+        // Mocks de los servicios externos
+        Product producto = new Product();
+        producto.setProductoId(inventario.getIdProducto());
+        producto.setNombreProducto("Espada de Astora");
+
+        Sucursal sucursal = new Sucursal();
+        sucursal.setIdSucursal(inventario.getIdSucursal());
+        sucursal.setNombreSucursal("Firelink Shrine");
+
+        // Simulaciones de los repos y clientes
         when(inventoryRepository.findById(id)).thenReturn(Optional.of(inventario));
+        when(productoClientRest.findByIdProducto(inventario.getIdProducto())).thenReturn(producto);
+        when(sucursalClientRest.findByIdSucursal(inventario.getIdSucursal())).thenReturn(sucursal);
 
-        Inventory resultado = inventoryService.findById(id);
+        // Llamada al método
+        InventoryResponseDTO resultado = inventoryService.findById(id);
 
+        // Verificaciones
         assertThat(resultado).isNotNull();
         assertThat(resultado.getIdInventario()).isEqualTo(id);
+        assertThat(resultado.getNombreProducto()).isEqualTo("Espada de Astora");
+        assertThat(resultado.getNombreSucursal()).isEqualTo("Firelink Shrine");
 
         verify(inventoryRepository, times(1)).findById(id);
+        verify(productoClientRest, times(1)).findByIdProducto(inventario.getIdProducto());
+        verify(sucursalClientRest, times(1)).findByIdSucursal(inventario.getIdSucursal());
     }
+
 
     @Test
     @DisplayName("Debe lanzar excepción si el inventario no existe en la lista")
@@ -176,61 +196,54 @@ public class InventarioServiceTest {
     }
 
     @Test
-    @DisplayName("Debe guardar inventario correctamente cuando no hay excepciones")
-    void debeGuardarInventarioCorrectamente() {
-        // Datos de prueba
-        Inventory inventario = new Inventory(null, 10L, 1L, 100L);
+    @DisplayName("Debe guardar inventario correctamente y retornar InventoryResponseDTO")
+    void debeGuardarInventarioYRetornarDTO() {
+        // Datos de entrada
+        Inventory inventario = new Inventory(null, 10L, 1L, 100L); // productoId, sucursalId, cantidad
 
-        // Mock para producto válido
-        when(productoClientRest.findByIdProducto(inventario.getIdProducto()))
-                .thenReturn(new Product(inventario.getIdProducto(), "Producto Test", 1000.0));
+        // Mock Producto
+        Product productoMock = new Product(10L, "Producto Test", 1000.0);
+        when(productoClientRest.findByIdProducto(10L)).thenReturn(productoMock);
 
-        Faker faker = new Faker(new Locale("es", "CL")); // Faker con locale Chile para nombres y direcciones realistas
+        // Mock Sucursal
+        Sucursal sucursalMock = new Sucursal();
+        sucursalMock.setIdSucursal(1L);
+        sucursalMock.setNombreSucursal("Sucursal Central");
+        sucursalMock.setDireccionSucursal("Av. Siempre Viva 742");
+        sucursalMock.setCiudadSucursal("Springfield");
+        sucursalMock.setProvinciaSucursal("Provincia");
+        sucursalMock.setRegionSucursal("Región");
+        sucursalMock.setTelefonoSucursal("+56912345678");
+        sucursalMock.setEmailSucursal("sucursal@test.cl");
 
-        Sucursal sucursalFake = new Sucursal();
-        sucursalFake.setIdSucursal(faker.number().numberBetween(1L, 100L));
-        sucursalFake.setNombreSucursal(faker.company().name());
+        when(sucursalClientRest.findByIdSucursal(1L)).thenReturn(sucursalMock);
 
-// Para dirección tipo "Calle Ejemplo 1234"
-        String calle = faker.address().streetName(); // Ejemplo: "Av. Las Condes"
-        int numero = faker.number().numberBetween(1, 9999);
-        sucursalFake.setDireccionSucursal(calle + " " + numero);
+        // No existe inventario previo
+        when(inventoryRepository.findByIdProductoAndIdSucursal(10L, 1L)).thenReturn(Optional.empty());
 
-// Ciudad, Provincia y Región solo letras, sin números ni símbolos
-        sucursalFake.setCiudadSucursal(faker.address().cityName()); // Ejemplo: "Santiago"
-        sucursalFake.setProvinciaSucursal(faker.address().state()); // Ejemplo: "Metropolitana"
-        sucursalFake.setRegionSucursal(faker.address().state()); // Usa también estado o región
-
-// Teléfono Chile +569 seguido de 8 dígitos
-        String telefono = "+569" + faker.number().digits(8);
-        sucursalFake.setTelefonoSucursal(telefono);
-
-// Email válido
-        String emailSeguro = faker.name().firstName().toLowerCase() + "@gmail.com";
-        sucursalFake.setEmailSucursal(emailSeguro);
-
-        // Mock para que no exista inventario previo
-        when(inventoryRepository.findByIdProductoAndIdSucursal(inventario.getIdProducto(), inventario.getIdSucursal()))
-                .thenReturn(Optional.empty());
-
-        // Mock para guardar inventario (simula asignar ID al guardar)
-        Inventory inventarioGuardado = new Inventory(1L, inventario.getIdProducto(), inventario.getIdSucursal(), inventario.getCantidad());
+        // Mock guardar inventario (retorna con ID asignado)
+        Inventory inventarioGuardado = new Inventory(1L, 10L, 1L, 100L);
         when(inventoryRepository.save(inventario)).thenReturn(inventarioGuardado);
 
-        // Ejecutar método a testear
-        Inventory resultado = inventoryService.save(inventario);
+        // Ejecutar
+        InventoryResponseDTO resultado = inventoryService.save(inventario);
 
-        // Validaciones
+        // Verificar contenido del DTO
+        assertThat(resultado).isNotNull();
         assertThat(resultado.getIdInventario()).isEqualTo(1L);
-        assertThat(resultado.getIdProducto()).isEqualTo(inventario.getIdProducto());
-        assertThat(resultado.getCantidad()).isEqualTo(inventario.getCantidad());
+        assertThat(resultado.getIdProducto()).isEqualTo(10L);
+        assertThat(resultado.getNombreProducto()).isEqualTo("Producto Test");
+        assertThat(resultado.getIdSucursal()).isEqualTo(1L);
+        assertThat(resultado.getNombreSucursal()).isEqualTo("Sucursal Central");
+        assertThat(resultado.getCantidad()).isEqualTo(100L);
 
-        // Verificar que los mocks se llamaron correctamente
-        verify(productoClientRest).findByIdProducto(inventario.getIdProducto());
-        verify(sucursalClientRest).findByIdSucursal(inventario.getIdSucursal());
-        verify(inventoryRepository).findByIdProductoAndIdSucursal(inventario.getIdProducto(), inventario.getIdSucursal());
+        // Verificar mocks
+        verify(productoClientRest).findByIdProducto(10L);
+        verify(sucursalClientRest).findByIdSucursal(1L);
+        verify(inventoryRepository).findByIdProductoAndIdSucursal(10L, 1L);
         verify(inventoryRepository).save(inventario);
     }
+
 
     @Test
     @DisplayName("Debe actualizar correctamente la cantidad del inventario")
