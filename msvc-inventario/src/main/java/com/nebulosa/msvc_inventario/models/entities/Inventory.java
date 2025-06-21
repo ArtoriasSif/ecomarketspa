@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class Inventory {
 
     @Id
@@ -26,5 +27,6 @@ public class Inventory {
 
     @Column(nullable = false)
     private Long cantidad;
+
 
 }

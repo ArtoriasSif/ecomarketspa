@@ -15,13 +15,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.swing.text.html.parser.Entity;
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -118,6 +121,41 @@ public class InventoryController {
         return ResponseEntity.ok(inventario);
     }
 
+
+    @GetMapping("/sucursal/detallado/{idSucursal}")
+    @Operation(
+            summary = "Obtener inventario detallado por sucursal",
+            description = "Devuelve el inventario con nombres de producto y sucursal para una sucursal específica"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Inventario detallado encontrado",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada o sin inventario",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorDTO.class)
+                    )
+            )
+    })
+    @Parameter(
+            name = "idSucursal",
+            description = "ID de la sucursal para consultar inventario detallado",
+            required = true,
+            example = "2001"
+    )
+    public ResponseEntity<List<InventoryResponseDTO>> findDetalleBySucursal(@PathVariable Long idSucursal) {
+        List<InventoryResponseDTO> dtos = inventoryService.findDetalleBySucursal(idSucursal);
+        return ResponseEntity.ok(dtos);
+    }
+
     @PostMapping
     @Operation(
             summary = "Crear nuevo inventario",
@@ -140,16 +178,24 @@ public class InventoryController {
                     content = @Content(schema = @Schema(implementation = ErrorDTO.class))
             )
     })
-    @Parameter(
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Datos del inventario a crear",
             required = true,
-            schema = @Schema(implementation = Inventory.class)
+            content = @Content(schema = @Schema(implementation = InventoryDTO.class))
     )
-    public ResponseEntity<InventoryResponseDTO> createInventory(@Validated @RequestBody Inventory inventory){
-        return ResponseEntity
-                .status(201)
-                .body(inventoryService.save(inventory));
+    public ResponseEntity<InventoryResponseDTO> createInventory(@Valid @RequestBody InventoryDTO request) {
+        InventoryResponseDTO response = inventoryService.save(request);
+
+        // Se puede incluir el header Location si quieres seguir prácticas RESTful
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.getIdInventario())
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
     }
+
 
     @Operation(
             summary = "Actualizar la cantidad del inventario",
