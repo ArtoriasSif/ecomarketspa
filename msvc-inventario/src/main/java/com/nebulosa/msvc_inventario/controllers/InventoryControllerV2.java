@@ -4,6 +4,7 @@ package com.nebulosa.msvc_inventario.controllers;
 import com.nebulosa.msvc_inventario.assemblers.InventoryEntityModelAssembler;
 import com.nebulosa.msvc_inventario.assemblers.InventoryResponseDTOAssembler;
 import com.nebulosa.msvc_inventario.dtos.ErrorDTO;
+import com.nebulosa.msvc_inventario.dtos.InventoryDTO;
 import com.nebulosa.msvc_inventario.dtos.InventoryResponseDTO;
 import com.nebulosa.msvc_inventario.dtos.QuantityUpdateDTO;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -25,7 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,19 +155,54 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
         return ResponseEntity.ok(collectionModel);
     }
 
+
+    @GetMapping("/sucursal/detallado/{idSucursal}")
+    @Operation(
+            summary = "Buscar inventario detallado por ID de sucursal (HATEOAS)",
+            description = "Devuelve una lista del inventario detallado en la sucursal indicada con enlaces HATEOAS"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Inventario detallado encontrado",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada o sin inventario",
+                    content = @Content(schema = @Schema(implementation = ErrorDTO.class))
+            )
+    })
+    public ResponseEntity<CollectionModel<EntityModel<InventoryResponseDTO>>> findDetalleBySucursal(@PathVariable Long idSucursal) {
+        List<InventoryResponseDTO> dtos = inventoryService.findDetalleBySucursal(idSucursal);
+
+        if (dtos.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<EntityModel<InventoryResponseDTO>> recursos = dtos.stream()
+                .map(inventoryResponseDTOAssembler::toModel)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<InventoryResponseDTO>> collectionModel = CollectionModel.of(
+                recursos,
+                linkTo(methodOn(InventoryControllerV2.class).findDetalleBySucursal(idSucursal)).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collectionModel);
+    }
+
+
     @PostMapping
     @Operation(
-            summary = "Crear nuevo inventario",
-            description = "Crea un nuevo registro de inventario para un producto en una sucursal. Valida la existencia del producto y la sucursal antes de guardar."
+            summary = "Crear nuevo inventario (con enlaces HATEOAS)",
+            description = "Crea un nuevo inventario en la sucursal para un producto, validando existencia previa. Devuelve DTO con enlaces."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
                     description = "Inventario creado correctamente",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = InventoryResponseDTO.class)
-                    )
+                    content = @Content(schema = @Schema(implementation = InventoryResponseDTO.class))
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -176,23 +215,26 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
                     content = @Content(schema = @Schema(implementation = ErrorDTO.class))
             )
     })
-    @Parameter(
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Datos del inventario a crear",
             required = true,
-            schema = @Schema(implementation = Inventory.class)
+            content = @Content(schema = @Schema(implementation = InventoryDTO.class))
     )
-    public ResponseEntity<EntityModel<InventoryResponseDTO>> createInventory(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Datos del inventario a crear",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = Inventory.class))
-            )
-            @Validated @RequestBody Inventory inventory) {
+    public ResponseEntity<EntityModel<InventoryResponseDTO>> createInventory(@Valid @RequestBody InventoryDTO request) {
+        InventoryResponseDTO response = inventoryService.save(request);
 
-        InventoryResponseDTO dto = inventoryService.save(inventory);
-        EntityModel<InventoryResponseDTO> resource = inventoryResponseDTOAssembler.toModel(dto);
-        return ResponseEntity.status(201).body(resource);
+        EntityModel<InventoryResponseDTO> model = inventoryResponseDTOAssembler.toModel(response);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.getIdInventario())
+                .toUri();
+
+        return ResponseEntity.created(location).body(model);
     }
+
+
 
     @Operation(
             summary = "Actualizar la cantidad del inventario",
