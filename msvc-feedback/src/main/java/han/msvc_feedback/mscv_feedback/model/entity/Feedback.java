@@ -41,4 +41,11 @@ public class Feedback {
     public void prePersist() {
         this.dateFeedback = LocalDateTime.now();
     }
+
+    public Feedback(String dateFeedback, String textoFeedback, Long usuarioIdFeedback, Long productIdFeedback) {
+        this.dateFeedback = LocalDateTime.parse(dateFeedback);
+        this.textoFeedback = textoFeedback;
+        this.usuarioIdFeedback = usuarioIdFeedback;
+        this.productIdFeedback = productIdFeedback;
+    }
 }

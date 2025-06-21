@@ -3,7 +3,6 @@ package com.nebula.msvc_usuarios.controller;
 import com.nebula.msvc_usuarios.dto.UsuarioUpdateDTO;
 import com.nebula.msvc_usuarios.model.Usuario;
 import com.nebula.msvc_usuarios.service.UsuarioService;
-import com.nebula.msvc_usuarios.service.UsuarioServiceImplements;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,21 +11,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/v1/usuarios")
+@RequestMapping("/api/v2/usuarios")
 @Validated
-@Tag(name = "Usuario Controller", description = "Gestiona las operaciones relacionadas con los usuarios")
-public class UsuarioController {
+@Tag(name = "Usuario Controller V2", description = "Gestiona las operaciones relacionadas con los usuarios")
+public class UsuarioControllerV2 {
 
     @Autowired
     private UsuarioService usuarioService;
@@ -93,7 +92,14 @@ public class UsuarioController {
                             examples = @ExampleObject(value = "{\"message\": \"Usuario no encontrado con ID: 1\"}"))),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: el nombre no puede estar vacío\"}")))
+                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: el nombre no puede estar vacío\"}"))),
+            @ApiResponse(responseCode = "400", description = "Error de validación de campos",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"errors\": {\"telefonoUsuario\": \"El formato del telefono debe ser +56 9XXXXXXXX\"}}"))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class), // Optional: If you have a generic error response DTO
+                            examples = @ExampleObject(value = "{\"timestamp\": \"2025-06-20T14:30:00Z\", \"status\": 500, \"error\": \"Internal Server Error\", \"message\": \"Ha ocurrido un error inesperado en el servidor.\", \"path\": \"/api/v1/your-endpoint\"}")))
     })
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> updateUsuario(@Parameter(description = "ID del usuario a actualizar", required = true) @PathVariable Long id,
