@@ -2,6 +2,7 @@ package com.nebulosa.msvc_inventario.services;
 
 import com.nebulosa.msvc_inventario.clients.ProductoClientRest;
 import com.nebulosa.msvc_inventario.clients.SucursalClientRest;
+import com.nebulosa.msvc_inventario.dtos.InventoryDTO;
 import com.nebulosa.msvc_inventario.dtos.InventoryResponseDTO;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
 import com.nebulosa.msvc_inventario.models.Product;
@@ -74,10 +75,44 @@ public class InventoryServiceImpl implements InventoryService {
         return dtos;
     }
 
-
+    @Transactional
+    @Override
     public List<Inventory> findByIdSucursal(Long idSucursal) {
         return inventoryRepository.findByIdSucursal(idSucursal);
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<InventoryResponseDTO> findDetalleBySucursal(Long idSucursal) {
+        List<Inventory> inventarios = inventoryRepository.findByIdSucursal(idSucursal);
+
+        if (inventarios.isEmpty()) {
+            throw new InventoryException("No se encontró inventario para la sucursal con ID " + idSucursal);
+        }
+
+        List<InventoryResponseDTO> dtos = new ArrayList<>();
+
+        for (Inventory i : inventarios) {
+            Product p = productoClientRest.findByIdProducto(i.getIdProducto());
+            Sucursal s = sucursalClientRest.findByIdSucursal(i.getIdSucursal());
+
+            InventoryResponseDTO dto = InventoryResponseDTO.builder()
+                    .idInventario(i.getIdInventario())
+                    .idProducto(i.getIdProducto())
+                    .nombreProducto(p.getNombreProducto())
+                    .idSucursal(i.getIdSucursal())
+                    .nombreSucursal(s.getNombreSucursal())
+                    .cantidad(i.getCantidad())
+                    .build();
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+
+
 
     @Transactional
     @Override
@@ -87,37 +122,45 @@ public class InventoryServiceImpl implements InventoryService {
                         + productoId + " en la sucursal " + sucursalId));
     }
 
+
     @Transactional
     @Override
-    public InventoryResponseDTO save(Inventory inventory) {
+    public InventoryResponseDTO save(InventoryDTO dto) {
         // Validar que existe el producto
         Product producto;
         try {
-            producto = productoClientRest.findByIdProducto(inventory.getIdProducto());
+            producto = productoClientRest.findByIdProducto(dto.getProductoId());
         } catch (NotFound ex) {
-            throw new InventoryException("No se encontró el producto con id: " + inventory.getIdProducto());
+            throw new InventoryException("No se encontró el producto con id: " + dto.getProductoId());
         }
 
         // Validar que existe la sucursal
         Sucursal sucursal;
         try {
-            sucursal = sucursalClientRest.findByIdSucursal(inventory.getIdSucursal());
+            sucursal = sucursalClientRest.findByIdSucursal(dto.getSucursalId());
         } catch (NotFound ex) {
-            throw new InventoryException("No se encontró la sucursal con id: " + inventory.getIdSucursal());
+            throw new InventoryException("No se encontró la sucursal con id: " + dto.getSucursalId());
         }
 
         // Validar que no exista inventario duplicado
-        inventoryRepository.findByIdProductoAndIdSucursal(inventory.getIdProducto(), inventory.getIdSucursal())
+        inventoryRepository.findByIdProductoAndIdSucursal(dto.getProductoId(), dto.getSucursalId())
                 .ifPresent(existingInventory -> {
                     throw new InventoryException("Ya existe un inventario para el producto " +
-                            inventory.getIdProducto() + " en la sucursal " + inventory.getIdSucursal() +
+                            dto.getProductoId() + " en la sucursal " + dto.getSucursalId() +
                             ". Actualice el inventario con ID: " + existingInventory.getIdInventario());
                 });
 
-        // Guardar el nuevo inventario
-        Inventory savedInventory = inventoryRepository.save(inventory);
+        // Crear entidad desde el DTO
+        Inventory nuevoInventario = Inventory.builder()
+                .idProducto(dto.getProductoId())
+                .idSucursal(dto.getSucursalId())
+                .cantidad(dto.getQuantity())
+                .build();
 
-        // Crear y retornar DTO
+        // Guardar en base de datos
+        Inventory savedInventory = inventoryRepository.save(nuevoInventario);
+
+        // Retornar DTO de respuesta
         return InventoryResponseDTO.builder()
                 .idInventario(savedInventory.getIdInventario())
                 .idProducto(savedInventory.getIdProducto())

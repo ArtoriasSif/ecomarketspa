@@ -2,6 +2,7 @@ package com.nebulosa.msvc_inventario.services;
 
 import com.nebulosa.msvc_inventario.clients.ProductoClientRest;
 import com.nebulosa.msvc_inventario.clients.SucursalClientRest;
+import com.nebulosa.msvc_inventario.dtos.InventoryDTO;
 import com.nebulosa.msvc_inventario.dtos.InventoryResponseDTO;
 import com.nebulosa.msvc_inventario.exceptions.InventoryException;
 import com.nebulosa.msvc_inventario.models.Product;
@@ -198,8 +199,12 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe guardar inventario correctamente y retornar InventoryResponseDTO")
     void debeGuardarInventarioYRetornarDTO() {
-        // Datos de entrada
-        Inventory inventario = new Inventory(null, 10L, 1L, 100L); // productoId, sucursalId, cantidad
+        // Datos de entrada: el DTO usado por el controller/service
+        InventoryDTO dto = InventoryDTO.builder()
+                .productoId(10L)
+                .sucursalId(1L)
+                .quantity(100L)
+                .build();
 
         // Mock Producto
         Product productoMock = new Product(10L, "Producto Test", 1000.0);
@@ -221,12 +226,12 @@ public class InventarioServiceTest {
         // No existe inventario previo
         when(inventoryRepository.findByIdProductoAndIdSucursal(10L, 1L)).thenReturn(Optional.empty());
 
-        // Mock guardar inventario (retorna con ID asignado)
+        // Mock guardar inventario (el objeto que debería devolver la DB con ID)
         Inventory inventarioGuardado = new Inventory(1L, 10L, 1L, 100L);
-        when(inventoryRepository.save(inventario)).thenReturn(inventarioGuardado);
+        when(inventoryRepository.save(any(Inventory.class))).thenReturn(inventarioGuardado);
 
         // Ejecutar
-        InventoryResponseDTO resultado = inventoryService.save(inventario);
+        InventoryResponseDTO resultado = inventoryService.save(dto);
 
         // Verificar contenido del DTO
         assertThat(resultado).isNotNull();
@@ -237,12 +242,13 @@ public class InventarioServiceTest {
         assertThat(resultado.getNombreSucursal()).isEqualTo("Sucursal Central");
         assertThat(resultado.getCantidad()).isEqualTo(100L);
 
-        // Verificar mocks
+        // Verificar llamadas
         verify(productoClientRest).findByIdProducto(10L);
         verify(sucursalClientRest).findByIdSucursal(1L);
         verify(inventoryRepository).findByIdProductoAndIdSucursal(10L, 1L);
-        verify(inventoryRepository).save(inventario);
+        verify(inventoryRepository).save(any(Inventory.class));
     }
+
 
 
     @Test

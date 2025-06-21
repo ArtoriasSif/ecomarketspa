@@ -15,7 +15,8 @@ public class InventoryResponseDTOAssembler implements RepresentationModelAssembl
     public EntityModel<InventoryResponseDTO> toModel(InventoryResponseDTO dto) {
         return EntityModel.of(dto,
                 linkTo(methodOn(InventoryControllerV2.class).findById(dto.getIdInventario())).withSelfRel(),
-                linkTo(methodOn(InventoryControllerV2.class).findAllWithDetails()).withRel("inventarios-detallados")
+                linkTo(methodOn(InventoryControllerV2.class).findAllWithDetails()).withRel("inventarios-detallados"),
+                linkTo(methodOn(InventoryControllerV2.class).findDetalleBySucursal(dto.getIdSucursal())).withRel("sucursal-detallado")
         );
     }
 }
