@@ -8,13 +8,17 @@ import han.msvc_feedback.mscv_feedback.model.Usuario;
 import han.msvc_feedback.mscv_feedback.model.entity.Feedback;
 import han.msvc_feedback.mscv_feedback.repository.FeedbackRepository;
 import han.msvc_feedback.mscv_feedback.service.FeedbackServiceImplements;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,6 +36,20 @@ public class FeedbackServiceTest {
 
     @InjectMocks
     private FeedbackServiceImplements feedbackServiceImplements;
+    private Faker faker;
+    private Feedback feedbackPrueba;
 
+    @BeforeEach
+    public void setUp() {
+        Faker faker = new Faker(Locale.of("es", "CL"));
+        for (int i = 0; i < 10; i++) {
+            Feedback feedback = new Feedback();
 
+        }
+    }
+
+    @Test
+    public void createFeedbackTest() {
+
+    }
 }

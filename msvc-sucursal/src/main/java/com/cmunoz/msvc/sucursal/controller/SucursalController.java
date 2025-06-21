@@ -30,23 +30,24 @@ import java.util.List;
 @Tag(name ="Sucursal", description = "Operaciones CRUD de Sucursal")
 public class SucursalController {
 
-    //Falta agregar PUT
+
     @Autowired
     private SucursalService sucursalService;
 
 
 
-    @GetMapping
-    @Operation(summary = "Obtiene todas las sucursales", description = "Devuelve un list de sucursales en el body")
+    @Operation(summary = "Obtener todas las sucursales", description = "Recupera una lista de todas las sucursales disponibles en el sistema.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = SucursalDTO.class)
-                    )
-            )
+            @ApiResponse(responseCode = "200", description = "Lista de sucursales recuperada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class, type = "array"),
+                            examples = @ExampleObject(value = "[{\"id\": 1, \"nombre\": \"Sucursal Central\", \"direccion\": \"Av. Principal 123\"}, {\"id\": 2, \"nombre\": \"Sucursal Sur\", \"direccion\": \"Calle Falsa 456\"}]"))),
+            @ApiResponse(responseCode = "404", description = "No se encontraron sucursales",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"No hay sucursales registradas.\"}")
+                    ))
     })
+    @GetMapping
     public ResponseEntity<List<Sucursal>> getAllSucursales() {
         return ResponseEntity
                 .ok()
@@ -54,98 +55,115 @@ public class SucursalController {
     }
 
 
-    @GetMapping("/id/{id}")
-    @Operation(summary = "Obtiene una sucursal buscando por su ID", description = "Devuelve un body con una sucursal")
+    @Operation(summary = "Obtener una sucursal por ID", description = "Recupera los detalles de una sucursal específica utilizando su ID.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "200", description = "Sucursal encontrada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"id\": 1, \"nombre\": \"Sucursal Central\", \"direccion\": \"Av. Principal 123\"}"))),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = SucursalDTO.class)
-                            )
-            )
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Sucursal no encontrada con ID: 1\"}")
+                    ))
+    })
 
-    })
-    @Parameters(value = {
-            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
-    })
-    public ResponseEntity<Sucursal> getSucursalFindById(@PathVariable Long id) {
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Sucursal> getSucursalFindById(
+            @Parameter(description = "ID de la sucursal a buscar", required = true, example = "1") @PathVariable Long id) {
         return ResponseEntity.ok(sucursalService.findByIdSucursal(id));
     }
 
-    @GetMapping("/nombre/{nombre}")
-    @Operation(summary = "Obtine una sucursal buscando por su nombre", description = "Devuelve un body con una sucursal")
+    @Operation(summary = "Obtener una sucursal por nombre", description = "Recupera los detalles de una sucursal específica utilizando su nombre.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Operacion Exitorsa"),
+            @ApiResponse(responseCode = "200", description = "Sucursal encontrada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"id\": 1, \"nombre\": \"Sucursal Central\", \"direccion\": \"Av. Principal 123\"}"))),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = SucursalDTO.class)
-                    )
-            )
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Sucursal no encontrada con nombre: Sucursal Central\"}")
+                    ))
     })
-    @Parameters(value = {
-            @Parameter(name = "nombre_sucursal", description = "Nombre de Sucursal")
-    })
-    public ResponseEntity<Sucursal> getSucursalByNombreSucursal( @PathVariable String nombre) {
+
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<Sucursal> getSucursalByNombreSucursal(
+            @Parameter(description = "Nombre de la sucursal a buscar", required = true, example = "Sucursal Central") @PathVariable String nombre) {
         return ResponseEntity
-                .status(200)
+                .status(HttpStatus.OK)
                 .body(sucursalService.findByNombreSucursal(nombre));
     }
 
-    @PostMapping()
-    @Operation(summary = "Crea una nueva sucursal", description = "Crea una nueva sucursal recibiendo un body")
+    @Operation(summary = "Crear una nueva sucursal", description = "Registra una nueva sucursal en el sistema.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "405", description = "Sucursal no creada, ID ya usada"
-                    )
+            @ApiResponse(responseCode = "201", description = "Sucursal creada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"id\": 3, \"nombre\": \"Sucursal Este\", \"direccion\": \"Calle Inventada 789\"}"))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida o datos duplicados",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: El nombre de la sucursal no puede estar vacío\"}")))
     })
-    @Parameters(value = {
-            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
-    })
-    public ResponseEntity<Sucursal> saveSucursal(@Validated @RequestBody Sucursal sucursal) {
+
+    @PostMapping()
+    public ResponseEntity<Sucursal> saveSucursal(
+            @Parameter(description = "Datos de la sucursal a crear", required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"nombre\": \"Sucursal Este\", \"direccion\": \"Calle Inventada 789\"}")))
+            @Validated @RequestBody Sucursal sucursal) {
         return ResponseEntity
-                .status(201)
+                .status(HttpStatus.CREATED)
                 .body(sucursalService.save(sucursal));
     }
 
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar una sucursal", description = "Actualiza una sucursal recibiendo un body")
+    @Operation(summary = "Actualizar una sucursal existente", description = "Actualiza los detalles de una sucursal específica por su ID.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no actulizada, Id no encontrada")
+            @ApiResponse(responseCode = "200", description = "Sucursal actualizada exitosamente",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "Sucursal actualizada exitosamente"))),
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada para actualizar",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "Sucursal no encontrada con ID: 1"))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida o error de validación",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "Error de validación: La dirección no puede estar vacía")))
     })
-    @Parameters(value = {
-            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
-    })
-    public ResponseEntity<String> updateSucursal(@PathVariable Long id, @Validated @RequestBody Sucursal sucursal) {
-        try{
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateSucursal(
+            @Parameter(description = "ID de la sucursal a actualizar", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "Nuevos datos de la sucursal", required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"nombre\": \"Sucursal Central (Actualizada)\", \"direccion\": \"Nueva Dirección 123\"}")))
+            @Validated @RequestBody Sucursal sucursal) {
+        try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(sucursalService.updateByIdSucursal(id, sucursal));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    @PutMapping("/{id}")
-    @Operation(summary = "Borrar una sucursal", description = "Borrar una sucursal desde su ID")
+    @Operation(summary = "Eliminar una sucursal por ID", description = "Elimina una sucursal del sistema utilizando su ID.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Operacion Exitorsa"),
-            @ApiResponse(responseCode = "404", description = "Sucursal no Borrada, Id no encontrada")
+            @ApiResponse(responseCode = "200", description = "Sucursal eliminada exitosamente",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "Sucursal eliminada exitosamente"))),
+            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada para eliminar",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "Sucursal no encontrada con ID: 1")))
     })
-    @Parameters(value = {
-            @Parameter(name = "id_sucursal", description = "ID de Sucursal")
-    })
-    public ResponseEntity<String> deleteSucursal(@PathVariable Long id) {
-        try{
 
+    public ResponseEntity<String> deleteSucursal(
+            @Parameter(description = "ID de la sucursal a eliminar", required = true, example = "1") @PathVariable Long id) {
+        try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(sucursalService.deleteByIdSucursal(id));
-
-        } catch (Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }

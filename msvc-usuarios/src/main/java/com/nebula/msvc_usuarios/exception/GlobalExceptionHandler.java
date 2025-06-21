@@ -1,6 +1,7 @@
 package com.nebula.msvc_usuarios.exception;
 
 import com.nebula.msvc_usuarios.dto.UsuarioErrorDTO;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -42,6 +43,20 @@ public class GlobalExceptionHandler {
             Map<String,String> errorMap = Collections.singletonMap("usuario",ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(this.createErrorDTO(HttpStatus.NOT_FOUND.value(),new Date(),errorMap));
+        }
+
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<UsuarioErrorDTO> handleConstraintViolation(ConstraintViolationException ex) {
+            Map<String, String> errorMap = new HashMap<>();
+
+            ex.getConstraintViolations().forEach(cv -> {
+                String field = cv.getPropertyPath().toString();
+                String message = cv.getMessage();
+                errorMap.put(field, message);
+            });
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(this.createErrorDTO(HttpStatus.BAD_REQUEST.value(), new Date(), errorMap));
         }
 
 }
