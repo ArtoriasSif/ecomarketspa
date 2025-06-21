@@ -1,6 +1,7 @@
 package com.cmunoz.msvc.sucursal.controller;
 
 
+import com.cmunoz.msvc.sucursal.assemblers.SucursalModelAssembler;
 import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +34,9 @@ public class SucursalControllerV2 {
 
     @Autowired
     private SucursalService sucursalService;
+
+    @Autowired
+    private SucursalModelAssembler sucursalModelAssembler;
 
 
 
@@ -53,22 +59,28 @@ public class SucursalControllerV2 {
     }
 
 
-    @Operation(summary = "Obtener una sucursal por ID", description = "Recupera los detalles de una sucursal específica utilizando su ID.")
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Obtiene una sucursal con enlaces HATEOAS",
+            description = "Devuelve los detalles de una sucursal con enlaces auto descriptivos (HATEOAS)"
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Sucursal encontrada exitosamente",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Sucursal.class),
-                            examples = @ExampleObject(value = "{\"id\": 1, \"nombre\": \"Sucursal Central\", \"direccion\": \"Av. Principal 123\"}"))),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"message\": \"Sucursal no encontrada con ID: 1\"}")
-                    ))
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sucursal encontrada",
+                    content = @Content(schema = @Schema(implementation = Sucursal.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada",
+                    content = @Content(schema = @Schema(example = "{\"message\": \"Sucursal no encontrada con ID: 1\"}"))
+            )
     })
-
-    @GetMapping("/id/{id}")
-    public ResponseEntity<Sucursal> getSucursalFindById(
-            @Parameter(description = "ID de la sucursal a buscar", required = true, example = "1") @PathVariable Long id) {
-        return ResponseEntity.ok(sucursalService.findByIdSucursal(id));
+    @Parameter(name = "id", description = "ID de la sucursal", required = true, example = "1")
+    public ResponseEntity<EntityModel<Sucursal>> getSucursalFindById(@PathVariable Long id) {
+        Sucursal sucursal = sucursalService.findByIdSucursal(id);
+        EntityModel<Sucursal> resource = sucursalModelAssembler.toModel(sucursal);
+        return ResponseEntity.ok(resource);
     }
 
     @Operation(summary = "Obtener una sucursal por nombre", description = "Recupera los detalles de una sucursal específica utilizando su nombre.")
