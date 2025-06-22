@@ -25,6 +25,21 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private InventarioClientRest inventarioClientRest;
 
+
+
+    @Transactional
+    @Override
+    public ProductoResponseDTO findByNombreProductoDTO(String nombreProducto) {
+        Product product = productRepository.findByNombreProducto(nombreProducto)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con nombre: " + nombreProducto));
+        ProductoResponseDTO dto = new ProductoResponseDTO();
+        dto.setNombreProducto(product.getNombreProducto());
+        dto.setPrecio(product.getPrecio());
+
+        return dto;
+
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<Product> findAll() {
@@ -140,6 +155,22 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
         return mensajes.stream().collect(Collectors.joining("\n"));
     }
+
+    @Override
+    public Product saveEntity(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Override
+    public Product updatePriceEntity(Long id, Double price) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product != null) {
+            product.setPrecio(price);
+            return productRepository.save(product);
+        }
+        return null;
+    }
+
 
 }
 

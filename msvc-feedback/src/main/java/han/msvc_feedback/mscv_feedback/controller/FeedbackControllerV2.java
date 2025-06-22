@@ -1,5 +1,6 @@
 package han.msvc_feedback.mscv_feedback.controller;
 
+import han.msvc_feedback.mscv_feedback.assembler.FeedbackModelAssembler;
 import han.msvc_feedback.mscv_feedback.dto.FeedbackDTO;
 import han.msvc_feedback.mscv_feedback.dto.FeedbackResponseDTO;
 import han.msvc_feedback.mscv_feedback.model.entity.Feedback;
@@ -13,15 +14,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+// otros imports omitidos por brevedad
+
+@RestController // Usamos RestController en vez de @Controller
 @RequestMapping("/api/v2/feedback")
 @Validated
 @Tag(name = "Feedback ControllerV2", description = "Gestiona las operaciones relacionadas con el feedback de los usuarios sobre productos.")
@@ -30,6 +36,49 @@ public class FeedbackControllerV2 {
     @Autowired
     private FeedbackService feedbackService;
 
+    @Autowired
+    private FeedbackModelAssembler assembler;
+
+    // FIND BY ID (con HATEOAS)
+    @GetMapping("/{id}")
+    public ResponseEntity<EntityModel<Feedback>> findByIdFeedback(
+            @Parameter(description = "ID del feedback a buscar", required = true) @PathVariable Long id) {
+
+        Feedback feedback = feedbackService.findByIdFeedback(id);
+        return ResponseEntity
+                .ok(assembler.toModel(feedback));
+    }
+
+    // FIND ALL (con HATEOAS)
+    @GetMapping()
+    public ResponseEntity<CollectionModel<EntityModel<Feedback>>> findAllFeedback() {
+        List<Feedback> feedbacks = feedbackService.findAllFeedbackEntities(); // Asegúrate de tener este método que devuelva List<Feedback>
+        List<EntityModel<Feedback>> feedbackModels = feedbacks.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        return ResponseEntity.ok(
+                CollectionModel.of(feedbackModels,
+                        linkTo(methodOn(FeedbackControllerV2.class).findAllFeedback()).withSelfRel())
+        );
+    }
+
+    // FIND ALL BY PRODUCT (con HATEOAS)
+    @GetMapping("/producto/{idProducto}")
+    public ResponseEntity<CollectionModel<EntityModel<Feedback>>> findByAllFeedbackProduct(
+            @Parameter(description = "ID del producto para el cual buscar feedback", required = true)
+            @PathVariable Long idProducto) {
+
+        List<Feedback> feedbacks = feedbackService.findAllFeedbackByProduct(idProducto); // Método nuevo que debe devolver Feedback
+        List<EntityModel<Feedback>> feedbackModels = feedbacks.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        return ResponseEntity.ok(
+                CollectionModel.of(feedbackModels,
+                        linkTo(methodOn(FeedbackControllerV2.class).findByAllFeedbackProduct(idProducto)).withSelfRel())
+        );
+    }
     //CREATE
     @Operation(summary = "Crear un nuevo feedback", description = "Permite a un usuario enviar un nuevo feedback (comentario o calificación) para un producto.")
     @ApiResponses(value = {
@@ -102,53 +151,5 @@ public class FeedbackControllerV2 {
                 .body(feedbackService.updateByIdFeedback(id, feedbackDTO));
     }
 
-    //FIND BY ID
-    @Operation(summary = "Obtener un feedback por ID", description = "Recupera los detalles de un feedback específico utilizando su ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Feedback encontrado exitosamente",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Feedback.class),
-                            examples = @ExampleObject(value = "{\"id\": 1, \"idUsuario\": 101, \"idProducto\": 201, \"calificacion\": 5, \"comentario\": \"Excelente producto, muy recomendado!\"}"))),
-            @ApiResponse(responseCode = "404", description = "Feedback no encontrado",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"message\": \"Feedback no encontrado con ID: 1\"}")))
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<Feedback> findByIdFeedback(
-            @Parameter(description = "ID del feedback a buscar", required = true) @PathVariable Long id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(feedbackService.findByIdFeedback(id));
-    }
-
-    //FIND ALL PRODUCT como mensiono el profe
-    @Operation(summary = "Obtener todos los feedback de un producto", description = "Recupera una lista de todos los feedback asociados a un producto específico por su ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de feedback del producto recuperada exitosamente",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FeedbackResponseDTO.class, type = "array"),
-                            examples = @ExampleObject(value = "[{\"id\": 1, \"idUsuario\": 101, \"idProducto\": 201, \"calificacion\": 5, \"comentario\": \"Excelente producto!\"}, {\"id\": 2, \"idUsuario\": 102, \"idProducto\": 201, \"calificacion\": 4, \"comentario\": \"Buen producto.\"}]")))
-    })
-    @GetMapping("/producto/{idProducto}")
-    public ResponseEntity<List<FeedbackResponseDTO>> findByAllFeedbackProduct(
-            @Parameter(description = "ID del producto para el cual buscar feedback", required = true) @PathVariable Long idProducto){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(feedbackService.findByAllFeedbackProduct(idProducto));
-    }
-
-    //FIND ALL
-    @Operation(summary = "Obtener todos los feedback", description = "Recupera una lista de todos los feedback registrados en el sistema.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de feedback recuperada exitosamente",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FeedbackResponseDTO.class, type = "array"),
-                            examples = @ExampleObject(value = "[{\"id\": 1, \"idUsuario\": 101, \"idProducto\": 201, \"calificacion\": 5, \"comentario\": \"Excelente producto!\"}, {\"id\": 2, \"idUsuario\": 102, \"idProducto\": 202, \"calificacion\": 4, \"comentario\": \"Buen producto.\"}]")))
-    })
-    @GetMapping()
-    public ResponseEntity<List<FeedbackResponseDTO>> findAllFeedback() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(feedbackService.findAllFeedback());
-    }
+    // Los demás métodos como create, update, delete pueden permanecer iguales
 }

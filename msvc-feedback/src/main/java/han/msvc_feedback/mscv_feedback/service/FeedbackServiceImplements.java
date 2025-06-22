@@ -32,6 +32,17 @@ public class FeedbackServiceImplements implements FeedbackService{
     @Autowired
     private UsuarioClientRest usuarioClientRest;
 
+
+    @Override
+    public List<Feedback> findAllFeedbackEntities() {
+        return feedbackRepository.findAll();
+    }
+
+    @Override
+    public List<Feedback> findAllFeedbackByProduct(Long idProducto) {
+        return feedbackRepository.findAllByProductIdFeedback(idProducto);
+    }
+
     //CREATE
     @Transactional
     @Override

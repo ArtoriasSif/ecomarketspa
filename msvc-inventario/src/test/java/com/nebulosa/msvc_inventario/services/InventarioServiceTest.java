@@ -79,7 +79,7 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe retornar InventoryResponseDTO desde la lista cuando existe")
     void debeRetornarInventoryResponseDTODesdeLista() {
-        Inventory inventario = inventarios.get(0); // El primero de la lista
+        Inventory inventario = inventarios.get(0);
         Long id = inventario.getIdInventario();
 
         // Mocks de los servicios externos
@@ -114,7 +114,7 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe lanzar excepción si el inventario no existe en la lista")
     void debeLanzarExcepcionSiNoExisteInventario() {
-        Long idInexistente = 999L; // asegurarse que no esté en la lista
+        Long idInexistente = 999L;
 
         when(inventoryRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
@@ -162,7 +162,7 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe retornar el inventario por producto y sucursal si existe")
     void debeRetornarInventarioSiExisteIdProductoyIdSucursal() {
-        Inventory inventario = inventarios.get(0); // usa uno de la lista generada
+        Inventory inventario = inventarios.get(0);
         Long productoId = inventario.getIdProducto();
         Long sucursalId = inventario.getIdSucursal();
 
@@ -199,7 +199,6 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe guardar inventario correctamente y retornar InventoryResponseDTO")
     void debeGuardarInventarioYRetornarDTO() {
-        // Datos de entrada: el DTO usado por el controller/service
         InventoryDTO dto = InventoryDTO.builder()
                 .productoId(10L)
                 .sucursalId(1L)
@@ -223,17 +222,13 @@ public class InventarioServiceTest {
 
         when(sucursalClientRest.findByIdSucursal(1L)).thenReturn(sucursalMock);
 
-        // No existe inventario previo
         when(inventoryRepository.findByIdProductoAndIdSucursal(10L, 1L)).thenReturn(Optional.empty());
 
-        // Mock guardar inventario (el objeto que debería devolver la DB con ID)
         Inventory inventarioGuardado = new Inventory(1L, 10L, 1L, 100L);
         when(inventoryRepository.save(any(Inventory.class))).thenReturn(inventarioGuardado);
 
-        // Ejecutar
         InventoryResponseDTO resultado = inventoryService.save(dto);
 
-        // Verificar contenido del DTO
         assertThat(resultado).isNotNull();
         assertThat(resultado.getIdInventario()).isEqualTo(1L);
         assertThat(resultado.getIdProducto()).isEqualTo(10L);
@@ -242,7 +237,6 @@ public class InventarioServiceTest {
         assertThat(resultado.getNombreSucursal()).isEqualTo("Sucursal Central");
         assertThat(resultado.getCantidad()).isEqualTo(100L);
 
-        // Verificar llamadas
         verify(productoClientRest).findByIdProducto(10L);
         verify(sucursalClientRest).findByIdSucursal(1L);
         verify(inventoryRepository).findByIdProductoAndIdSucursal(10L, 1L);

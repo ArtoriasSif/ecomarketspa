@@ -69,7 +69,6 @@ public class PedidoServiceTest {
         }
     }
 
-    //GetMapping listar todos los pedidos
     @Test
     @DisplayName("Debo listar todos los pedidos")
     public void deboListarTodosLosPedidos() {
@@ -85,7 +84,6 @@ public class PedidoServiceTest {
         verify(pedidoRepository, times(1)).findAll();
     }
 
-    //GetMapping Listar un pedido por Id pedido
     @Test
     @DisplayName("Debo listar un pedido")
     public void deboListarUnMedico() {
@@ -97,35 +95,28 @@ public class PedidoServiceTest {
         verify(pedidoRepository, times(1)).findById(Long.valueOf(1));
     }
 
-    //GetMapping Listar un pedido que esta implementado para traer lista de msvc-detalles
     @Test
     @DisplayName("Debe obtener un pedido con detalles correctamente")
     public void debeObtenerPedidoConDetalles() {
         Long idPedido = 1L;
 
-        // Pedido fake
         Pedido pedidoFake = new Pedido(idPedido, LocalDateTime.now(), 10L, 20L);
 
-        // Lista de detalles fake
         List<DetallePedido> detallesFake = List.of(
                 new DetallePedido(100L, idPedido, 200L, 2L, 100.0), // 2 * 50.0 = 100.0
                 new DetallePedido(101L, idPedido, 201L, 1L, 100.0)  // 1 * 100.0 = 100.0
         );
 
-        // Productos fake
         Producto producto1 = new Producto(200L, "Producto A", 50.0);
         Producto producto2 = new Producto(201L, "Producto B", 100.0);
 
-        // Usuario fake
         Usuario usuarioFake = new Usuario();
         usuarioFake.setNombreUsuario("Usuario Test");
         usuarioFake.setRutUsuario("12345678-9");
 
-        // Sucursal fake
         Sucursal sucursalFake = new Sucursal();
         sucursalFake.setNombreSucursal("Sucursal Test");
 
-        // Mocks configurados
         when(pedidoRepository.findById(idPedido)).thenReturn(Optional.of(pedidoFake));
         when(detallePedidoClientRest.findByIdPedido(idPedido)).thenReturn(detallesFake);
         when(productoClientRest.findByIdProducto(200L)).thenReturn(producto1);
@@ -133,17 +124,14 @@ public class PedidoServiceTest {
         when(usuarioClientRest.findByIdUsuario(10L)).thenReturn(usuarioFake);
         when(sucursalClientRest.findByIdSucursal(20L)).thenReturn(sucursalFake);
 
-        // Ejecutar el metodo bajo prueba
         PedidoConDetalleDTO resultado = pedidoService.findPedidoConDetalles(idPedido);
 
-        // Validaciones
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNombreUsuario()).isEqualTo("Usuario Test");
         assertThat(resultado.getRutUsuario()).isEqualTo("12345678-9");
         assertThat(resultado.getNombreSucursal()).isEqualTo("Sucursal Test");
         assertThat(resultado.getDetalles()).hasSize(2);
 
-        // Validar detalles
         assertThat(resultado.getDetalles().get(0).getNombreProducto()).isEqualTo("Producto A");
         assertThat(resultado.getDetalles().get(0).getCantidad()).isEqualTo(2);
         assertThat(resultado.getDetalles().get(0).getPrecioUnitario()).isEqualTo(50.0);
@@ -154,10 +142,8 @@ public class PedidoServiceTest {
         assertThat(resultado.getDetalles().get(1).getPrecioUnitario()).isEqualTo(100.0);
         assertThat(resultado.getDetalles().get(1).getSubTotal()).isEqualTo(100.0);
 
-        // Validar total
         assertThat(resultado.getTotal()).isEqualTo(200.0); // 100 + 100
 
-        // Verificar invocaciones
         verify(pedidoRepository, times(1)).findById(idPedido);
         verify(detallePedidoClientRest, times(1)).findByIdPedido(idPedido);
         verify(productoClientRest, times(1)).findByIdProducto(200L);
@@ -166,7 +152,6 @@ public class PedidoServiceTest {
         verify(sucursalClientRest, times(1)).findByIdSucursal(20L);
     }
 
-    //GetMapping Listar un pedido con detalle. Lanza Exception si no en encuentra la id pedido
     @Test
     @DisplayName("Debe lanzar excepción cuando el pedido no existe al buscar por ID")
     public void debeLanzarExcepcionCuandoPedidoNoExistePorId() {
@@ -181,7 +166,6 @@ public class PedidoServiceTest {
         verify(pedidoRepository, times(1)).findById(idInexistente);
     }
 
-    //PostMapping guardar pedido
     @Test
     @DisplayName("Debe guardar un pedido")
     public void debeGuardarUnPedido() {
@@ -190,20 +174,15 @@ public class PedidoServiceTest {
 
         PedidoDTO pedidoDTO = new PedidoDTO(1L, 1L);
 
-        // Crear un usuario fake
         Usuario usuarioFake = new Usuario();
         usuarioFake.setNombreUsuario(faker.name().fullName());
 
-        // Crear una sucursal fake
         Sucursal sucursalFake = new Sucursal();
         sucursalFake.setIdSucursal(pedidoDTO.getIdSucursal());
-        // puedes agregar más atributos si los usas
 
-        // Mocks para los clientes
         when(usuarioClientRest.findByIdUsuario(anyLong())).thenReturn(usuarioFake);
         when(sucursalClientRest.findByIdSucursal(anyLong())).thenReturn(sucursalFake);
 
-        // Mock para guardar pedido
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> {
             Pedido pedidoGuardado = invocation.getArgument(0);
             return new Pedido(1L, LocalDateTime.now(), pedidoGuardado.getIdUsuario(), pedidoGuardado.getIdSucursal());
@@ -219,38 +198,30 @@ public class PedidoServiceTest {
 
     }
 
-    //PostMapping al guardar pedido. Lanza Exception si la id del usuario no existe
     @Test
     @DisplayName("Debe lanzar PedidoException si el usuario no existe")
     void debeLanzarExcepcionSiUsuarioNoExiste() {
         PedidoDTO pedidoDTO = new PedidoDTO(1L, 1L);
 
-        // Simular que el usuario no existe
         when(usuarioClientRest.findByIdUsuario(1L)).thenThrow(FeignException.NotFound.class);
 
-        // Ejecutar y verificar excepción
         assertThatThrownBy(() -> pedidoService.save(pedidoDTO))
                 .isInstanceOf(PedidoException.class)
                 .hasMessageContaining("No se encontró el usuario con id: 1");
 
-        // Verificar que no se llama al resto
         verify(sucursalClientRest, never()).findByIdSucursal(anyLong());
         verify(pedidoRepository, never()).save(any(Pedido.class));
     }
 
-    //PostMapping al guardar pedido. Lanza Exception si la id del sucursal no existe
     @Test
     @DisplayName("Debe lanzar PedidoException si la sucursal no existe")
     void debeLanzarExcepcionSiSucursalNoExiste() {
         PedidoDTO pedidoDTO = new PedidoDTO(1L, 1L);
 
-        // Usuario sí existe
         when(usuarioClientRest.findByIdUsuario(1L)).thenReturn(new Usuario());
 
-        // Sucursal no existe
         when(sucursalClientRest.findByIdSucursal(1L)).thenThrow(FeignException.NotFound.class);
 
-        // Ejecutar y verificar excepción
         assertThatThrownBy(() -> pedidoService.save(pedidoDTO))
                 .isInstanceOf(PedidoException.class)
                 .hasMessageContaining("No se encontró la sucursal con id: 1");
@@ -264,21 +235,16 @@ public class PedidoServiceTest {
     public void debeActualizarPedido() {
         Long id = 1L;
 
-        // Pedido actual en repositorio
         Pedido pedidoExistente = pedidos.get(0);
 
-        // Pedido con cambios para actualizar
         Pedido pedidoActualizado = new Pedido(id, LocalDateTime.now(), 2L, 2L);
 
-        // Mock: findById devuelve el pedido existente
         when(pedidoRepository.findById(id)).thenReturn(Optional.of(pedidoExistente));
         // Mock: save devuelve el pedido actualizado (simulación)
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Llamada al metodo bajo prueba
         Pedido resultado = pedidoService.updatePedido(id, pedidoActualizado);
 
-        // Verificaciones
         assertThat(resultado).isNotNull();
         assertThat(resultado.getIdUsuario()).isEqualTo(pedidoExistente.getIdUsuario());
         assertThat(resultado.getIdSucursal()).isEqualTo(pedidoExistente.getIdSucursal());
@@ -327,10 +293,8 @@ public class PedidoServiceTest {
 
         Pedido pedido = new Pedido(id, LocalDateTime.now(), 1L, 1L);
 
-        // Mock: cuando se busca el pedido por id, retorna el pedido
         when(pedidoRepository.findById(id)).thenReturn(Optional.of(pedido));
 
-        // No necesitamos mockear el void delete, solo verificar que se llama
         doNothing().when(detallePedidoClientRest).deleteByIdPedido(id);
         doNothing().when(pedidoRepository).delete(pedido);
 

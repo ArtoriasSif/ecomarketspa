@@ -89,15 +89,13 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe devolver el producto cuando existe")
     void debeDevolverProductoCuandoExiste() {
-        // Arrange
+
         Long idProducto = 1L;
         Product productoMock = new Product(idProducto, "Arroz", 2999.95);
         when(productRepository.findById(idProducto)).thenReturn(Optional.of(productoMock));
 
-        // Act
         Product resultado = productService.findByIdProducto(idProducto);
 
-        // Assert
         assertThat(resultado).isNotNull();
         assertThat(resultado.getIdProducto()).isEqualTo(idProducto);
         assertThat(resultado.getNombreProducto()).isEqualTo("Arroz");
@@ -107,11 +105,10 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe lanzar ProductException si el producto no existe")
     void debeLanzarExcepcionSiProductoNoExiste() {
-        // Arrange
+
         Long idInexistente = 999L;
         when(productRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
-        // Act & Assert
         ProductException ex = assertThrows(ProductException.class, () ->
                 productService.findByIdProducto(idInexistente));
 
@@ -122,15 +119,13 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe devolver el producto cuando existe por nombre")
     void debeDevolverProductoCuandoExistePorNombre() {
-        // Arrange
+
         String nombre = "Arroz";
         Product productoMock = new Product(1L, nombre, 2999.95);
         when(productRepository.findByNombreProducto(nombre)).thenReturn(Optional.of(productoMock));
 
-        // Act
         Product resultado = productService.findByNombreProducto(nombre);
 
-        // Assert
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNombreProducto()).isEqualTo(nombre);
         verify(productRepository).findByNombreProducto(nombre);
@@ -139,11 +134,10 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe lanzar ProductException si el producto no existe por nombre")
     void debeLanzarExcepcionSiProductoNoExistePorNombre() {
-        // Arrange
+
         String nombreInexistente = "ProductoInexistente";
         when(productRepository.findByNombreProducto(nombreInexistente)).thenReturn(Optional.empty());
 
-        // Act & Assert
         ProductException ex = assertThrows(ProductException.class, () ->
                 productService.findByNombreProducto(nombreInexistente)
         );
@@ -155,20 +149,17 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe guardar producto y capitalizar nombre correctamente")
     void debeGuardarProductoCorrectamente() {
-        // Arrange
+
         Product producto = new Product(null, "arroz integral", 2500.0);
 
-        // Mock para que no exista producto con ese nombre capitalizado
         when(productRepository.findByNombreProducto("Arroz Integral")).thenReturn(Optional.empty());
 
-        // Mock para simular guardado y asignar ID
         Product productoGuardado = new Product(1L, "Arroz Integral", 2500.0);
         when(productRepository.save(any(Product.class))).thenReturn(productoGuardado);
 
-        // Act
+
         ProductoResponseDTO resultado = productService.save(producto);
 
-        // Assert
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNombreProducto()).isEqualTo("Arroz Integral");
         assertThat(resultado.getDescripcion()).contains("registrado exitosamente");
@@ -179,14 +170,11 @@ public class ProductoServiceTest {
     @Test
     @DisplayName("Debe lanzar ProductException si el producto ya existe con nombre capitalizado")
     void debeLanzarExcepcionSiProductoYaExiste() {
-        // Arrange
         Product producto = new Product(null, "arroz integral", 2500.0);
 
-        // Simular que ya existe producto con nombre capitalizado
         when(productRepository.findByNombreProducto("Arroz Integral"))
                 .thenReturn(Optional.of(new Product(1L, "Arroz Integral", 2500.0)));
 
-        // Act & Assert
         ProductException ex = assertThrows(ProductException.class, () -> {
             productService.save(producto);
         });
@@ -264,7 +252,6 @@ public class ProductoServiceTest {
         verify(productRepository, never()).save(any());
     }
 
-    //Eliminar producto
     @Test
     @DisplayName("Debe eliminar inventarios con cantidad 0 y luego eliminar producto")
     void deleteByIdProductoInventariosSinStockEliminaInventariosYProducto() {
@@ -281,7 +268,6 @@ public class ProductoServiceTest {
 
         String resultado = productService.deleteByIdProducto(id);
 
-        // Verificaciones
         verify(inventarioClientRest).deleteInventoryById(10L);
         verify(inventarioClientRest).deleteInventoryById(11L);
         verify(productRepository).deleteById(id);
