@@ -11,6 +11,6 @@ public interface SucursalService {
     Sucursal findByIdSucursal(Long id);
     Sucursal save(Sucursal sucursal);
     String deleteByIdSucursal(Long idSucursal);
-    String updateByIdSucursal(Long id, Sucursal sucursal);
+    Sucursal updateByIdSucursal(Long id, Sucursal sucursal);
 
 }

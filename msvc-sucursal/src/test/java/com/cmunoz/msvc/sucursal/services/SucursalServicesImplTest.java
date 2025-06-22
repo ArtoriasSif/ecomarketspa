@@ -165,10 +165,10 @@ public class SucursalServicesImplTest {
         when(sucursalRepository.save(any(Sucursal.class))).thenReturn(existente);
 
 
-        String resultado = sucursalServices.updateByIdSucursal(idSucursal, actualizado);
+        Sucursal resultado = sucursalServices.updateByIdSucursal(idSucursal, actualizado);
 
 
-        assertEquals("La sucursal con id: 1 se actualizo exitosamente", resultado);
+        assertThat(resultado).isNotNull();
         verify(sucursalRepository, times(2)).findById(idSucursal); // <-- clave
         verify(sucursalRepository).save(any(Sucursal.class));
     }

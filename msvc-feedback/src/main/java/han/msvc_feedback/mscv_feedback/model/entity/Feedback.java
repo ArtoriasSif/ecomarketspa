@@ -1,5 +1,6 @@
 package han.msvc_feedback.mscv_feedback.model.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Schema(description = "Entidad que representa un Feedback")
 public class Feedback {
 
     @Id
@@ -27,14 +29,18 @@ public class Feedback {
 
     @Column(name="feedback_texto",nullable = false)
     @NotBlank(message = "El campo feedback no puede estar vacio.")
+    @Schema(description = "Texto del feedback", example = "Me gusta el producto")
     private String textoFeedback;
 
     @Column(name="feedback_usuario",nullable = false)
     @NotNull(message = "El campo usuario no puede estar vacio.")
+    @Schema(description = "Id del usuario que realiza el feedback", example = "1")
+
     private Long usuarioIdFeedback;
 
     @Column(name="feedback_product",nullable = false)
     @NotNull(message = "El campo producto no puede estar vacio.")
+    @Schema(description = "Id del producto que se le realiza el feedback", example = "1")
     private Long productIdFeedback;
 
     @PrePersist
