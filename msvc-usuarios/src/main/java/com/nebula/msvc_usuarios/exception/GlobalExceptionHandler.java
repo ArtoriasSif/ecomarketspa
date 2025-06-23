@@ -38,12 +38,12 @@ public class GlobalExceptionHandler {
                     .body(this.createErrorDTO(HttpStatus.BAD_REQUEST.value(),new Date(),errorMap));
         }
 
-        @ExceptionHandler(UsuarioException.class)
-        public ResponseEntity<UsuarioErrorDTO> handleProductException(UsuarioException ex){
-            Map<String,String> errorMap = Collections.singletonMap("usuario",ex.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(this.createErrorDTO(HttpStatus.NOT_FOUND.value(),new Date(),errorMap));
-        }
+    @ExceptionHandler(UsuarioException.class)
+    public ResponseEntity<UsuarioErrorDTO> handleProductException(UsuarioException ex) {
+        Map<String, String> errorMap = Collections.singletonMap("usuario", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(this.createErrorDTO(HttpStatus.CONFLICT.value(), new Date(), errorMap));
+    }
 
         @ExceptionHandler(ConstraintViolationException.class)
         public ResponseEntity<UsuarioErrorDTO> handleConstraintViolation(ConstraintViolationException ex) {

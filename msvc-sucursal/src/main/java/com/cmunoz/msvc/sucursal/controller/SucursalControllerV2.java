@@ -85,8 +85,8 @@ public class SucursalControllerV2 {
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Obtiene una sucursal con enlaces HATEOAS",
-            description = "Devuelve los detalles de una sucursal con enlaces auto descriptivos (HATEOAS)"
+            summary = "Obtiene una sucursal con ID",
+            description = "Devuelve los detalles de una sucursal"
     )
     @ApiResponses(value = {
             @ApiResponse(

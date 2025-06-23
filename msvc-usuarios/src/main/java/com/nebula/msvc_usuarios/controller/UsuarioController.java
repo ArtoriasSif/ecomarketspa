@@ -68,7 +68,10 @@ public class UsuarioController {
                             examples = @ExampleObject(value = "{\"id\": 3, \"nombre\": \"Pedro\", \"email\": \"pedro@example.com\",\"direccionUsuario\": \"1111 av. xdent\"}"))),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: el email no puede estar vacío\"}")))
+                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: el email no puede estar vacío\"}"))),
+            @ApiResponse(responseCode = "409", description = "Conflicto - Usuario ya existe",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Ya existe un usuario con este email\"}")))
     })
     @PostMapping()
     public ResponseEntity<Usuario> createUsuario(@Parameter(description = "Datos del usuario a crear", required = true,
