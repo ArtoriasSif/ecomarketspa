@@ -116,6 +116,7 @@ public class DetallePedidoServiceImpl implements DetallePedidoService{
                     .idPedido(detalle.getIdPedido())
                     .nombreUsuario(usuario.getNombreUsuario())
                     .nombreSucursal(sucursal.getNombreSucursal())
+                    .idProducto(producto.getIdProducto())
                     .nombreProducto(producto.getNombreProducto())
                     .cantidad(detalle.getCantidad())
                     .precioUnitario(producto.getPrecio())
