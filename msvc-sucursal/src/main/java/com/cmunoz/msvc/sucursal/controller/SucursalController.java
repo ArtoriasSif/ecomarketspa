@@ -1,12 +1,10 @@
 package com.cmunoz.msvc.sucursal.controller;
 
 
-import com.cmunoz.msvc.sucursal.dto.SucursalDTO;
 import com.cmunoz.msvc.sucursal.models.Entitys.Sucursal;
 import com.cmunoz.msvc.sucursal.services.SucursalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -117,34 +115,54 @@ public class SucursalController {
     }
 
 
-    @Operation(summary = "Actualizar una sucursal existente", description = "Actualiza los detalles de una sucursal específica por su ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Sucursal actualizada exitosamente",
-                    content = @Content(mediaType = "text/plain",
-                            examples = @ExampleObject(value = "Sucursal actualizada exitosamente"))),
-            @ApiResponse(responseCode = "404", description = "Sucursal no encontrada para actualizar",
-                    content = @Content(mediaType = "text/plain",
-                            examples = @ExampleObject(value = "Sucursal no encontrada con ID: 1"))),
-            @ApiResponse(responseCode = "400", description = "Solicitud inválida o error de validación",
-                    content = @Content(mediaType = "text/plain",
-                            examples = @ExampleObject(value = "Error de validación: La dirección no puede estar vacía")))
-    })
-
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateSucursal(
-            @Parameter(description = "ID de la sucursal a actualizar", required = true, example = "1") @PathVariable Long id,
-            @Parameter(description = "Nuevos datos de la sucursal", required = true,
-                    content = @Content(mediaType = "application/json",
+    @Operation(
+            summary = "Actualizar una sucursal existente",
+            description = "Actualiza los detalles de una sucursal específica por su ID y devuelve los datos actualizados."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sucursal actualizada exitosamente",
+                    content = @Content(
+                            mediaType = "application/json",
                             schema = @Schema(implementation = Sucursal.class),
-                            examples = @ExampleObject(value = "{\"nombre\": \"Sucursal Central (Actualizada)\", \"direccion\": \"Nueva Dirección 123\"}")))
+                            examples = @ExampleObject(value = "{\"idSucursal\": 1, \"nombre\": \"Sucursal Central (Actualizada)\", \"direccion\": \"Nueva Dirección 123\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada para actualizar",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Sucursal no encontrada con ID: 1\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud inválida o error de validación",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"message\": \"Error de validación: La dirección no puede estar vacía\"}")
+                    )
+            )
+    })
+    public ResponseEntity<Sucursal> updateSucursal(
+            @Parameter(description = "ID de la sucursal a actualizar", required = true, example = "1")
+            @PathVariable Long id,
+            @Parameter(
+                    description = "Nuevos datos de la sucursal",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Sucursal.class),
+                            examples = @ExampleObject(value = "{\"nombre\": \"Sucursal Central (Actualizada)\", \"direccion\": \"Nueva Dirección 123\"}")
+                    )
+            )
             @Validated @RequestBody Sucursal sucursal) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(sucursalService.updateByIdSucursal(id, sucursal));
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ex.getMessage());
-        }
+
+        Sucursal actualizada = sucursalService.updateByIdSucursal(id, sucursal);
+        return ResponseEntity.ok(actualizada);
     }
 
     @DeleteMapping("/{id}")

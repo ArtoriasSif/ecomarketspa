@@ -17,4 +17,6 @@ public interface FeedbackService {
     void deleteByIdFeedback(Long id);
     FeedbackResponseDTO updateByIdFeedback(Long id, FeedbackDTO feedbackDTO);
     List<FeedbackResponseDTO> findByAllFeedbackProduct (Long idProducto);
+    List<Feedback> findAllFeedbackEntities();
+    List<Feedback> findAllFeedbackByProduct(Long idProducto);
 }

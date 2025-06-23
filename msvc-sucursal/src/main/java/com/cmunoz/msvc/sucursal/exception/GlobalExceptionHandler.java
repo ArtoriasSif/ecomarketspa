@@ -2,6 +2,8 @@ package com.cmunoz.msvc.sucursal.exception;
 
 
 import com.cmunoz.msvc.sucursal.dto.SucursalDTO;
+import feign.RetryableException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -45,4 +47,17 @@ public class GlobalExceptionHandler {
                 .body(this.createErrorDTO(HttpStatus.NOT_FOUND.value(),new Date(),errorMap));
 
     }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ResponseEntity<Map<String, String>> handleFeignConnectionError(RetryableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", "No se pudo contactar al servicio de inventario. Inténtelo más tarde."));
+    }
+
+    // Puedes agregar más excepciones aquí según el caso
 }
+

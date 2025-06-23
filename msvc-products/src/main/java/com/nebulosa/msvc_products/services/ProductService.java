@@ -13,4 +13,7 @@ public interface ProductService {
     ProductoResponseDTO save(Product product);
     ProductoResponseDTO updatePrice(Long id, Double price);
     String deleteByIdProducto(Long id);
+    Product saveEntity(Product product);
+    Product updatePriceEntity(Long id, Double price);
+    ProductoResponseDTO findByNombreProductoDTO(String nombreProducto);
 }

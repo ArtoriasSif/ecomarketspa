@@ -83,7 +83,7 @@ public class SucursalServicesImpl implements SucursalService {
 
     @Transactional
     @Override
-    public String updateByIdSucursal(Long id, Sucursal sucursal) {
+    public Sucursal updateByIdSucursal(Long id, Sucursal sucursal) {
         if(!SucursalRepository.findById(id).isPresent()){
             throw new SucursalException("No se encontro la sucursal con id: " + id);
         }
@@ -96,7 +96,7 @@ public class SucursalServicesImpl implements SucursalService {
         sucursalUpdate.setRegionSucursal(sucursal.getRegionSucursal());
         sucursalUpdate.setEmailSucursal(sucursal.getEmailSucursal());
         SucursalRepository.save(sucursalUpdate);
-        return "La sucursal con id: " + id + " se actualizo exitosamente";
+        return sucursalUpdate;
     }
 
     public SucursalServicesImpl(SucursalRepository sucursalRepository,

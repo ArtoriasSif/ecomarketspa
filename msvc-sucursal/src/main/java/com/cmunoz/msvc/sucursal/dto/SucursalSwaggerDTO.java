@@ -19,13 +19,14 @@ public class SucursalSwaggerDTO {
     private String nombreSucursal;
     @Schema (description = "Direccion de la sucursal", example = "Lastarria 1234")
     private String direccionSucursal;
-    @Schema
+    @Schema (description = "Ciudad de la sucursal", example = "Santiago")
     private String ciudadSucursal;
-    @Schema
+    @Schema (description = "Provincia de la sucursal", example = "Santiago")
     private String provinciaSucursal;
-    @Schema
+    @Schema (description = "Region de la sucursal", example = "Metropolitana")
     private String regionSucursal;
-    @Schema
+    @Schema (description = "Telefono de la sucursal", example = "+56991234567")
     private String telefonoSucursal;
+    @Schema (description = "Email de la sucursal", example = "<EMAIL>")
     private String emailSucursal;
 }

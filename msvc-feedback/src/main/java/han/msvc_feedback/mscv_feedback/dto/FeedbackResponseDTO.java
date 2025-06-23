@@ -1,5 +1,6 @@
 package han.msvc_feedback.mscv_feedback.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
