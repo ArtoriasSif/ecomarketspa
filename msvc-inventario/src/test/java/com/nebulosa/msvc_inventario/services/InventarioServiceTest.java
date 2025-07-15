@@ -283,16 +283,30 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe actualizar la cantidad del inventario a 0")
     void debeActualizarCantidadACero() {
+        // Arrange
         Long id = 1L;
         Inventory inventario = new Inventory(id, 10L, 1L, 50L); // cantidad inicial: 50
 
+        Product producto = new Product();
+        producto.setNombreProducto("Producto de prueba");
+
+        Sucursal sucursal = new Sucursal();
+        sucursal.setNombreSucursal("Sucursal de prueba");
+
         when(inventoryRepository.findById(id)).thenReturn(Optional.of(inventario));
         when(inventoryRepository.save(any(Inventory.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(productoClientRest.findByIdProducto(10L)).thenReturn(producto);
+        when(sucursalClientRest.findByIdSucursal(1L)).thenReturn(sucursal);
 
-        inventoryService.updateInventory(id);
+        // Act
+        InventoryResponseDTO response = inventoryService.updateInventory(id);
 
+        // Assert
         assertThat(inventario.getCantidad()).isEqualTo(0L);
         verify(inventoryRepository).save(inventario);
+        assertThat(response.getCantidad()).isEqualTo(0L);
+        assertThat(response.getNombreProducto()).isEqualTo("Producto de prueba");
+        assertThat(response.getNombreSucursal()).isEqualTo("Sucursal de prueba");
     }
 
     @Test

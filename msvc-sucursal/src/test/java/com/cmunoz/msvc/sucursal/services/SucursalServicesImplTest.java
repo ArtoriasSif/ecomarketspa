@@ -63,7 +63,6 @@ public class SucursalServicesImplTest {
                 sucursal.setEmailSucursal(faker.internet().emailAddress());
                 sucursals.add(sucursal);
         }
-
     }
 
     @Test

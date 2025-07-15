@@ -73,20 +73,78 @@ public class DetallePedidoServiceImplTest {
 
     //GetMapping con parametro id Pedido, retorna lista de detalles asociados Id Pedido
     @Test
-    @DisplayName("Debe retornar los detalles de un pedido por su ID")
-    public void debeRetornarDetallesPorIdPedido() {
+    @DisplayName("Debe retornar los detalles de un pedido por su ID con todos los datos relacionados")
+    void debeRetornarDetallesPorIdPedido() {
         Long idPedido = 100L;
 
+        // Preparar datos de prueba (3 detalles)
+        DetallePedido detalle1 = new DetallePedido();
+        detalle1.setIdDetallePedido(1L);
+        detalle1.setIdPedido(100L);
+        detalle1.setIdProducto(10L);
+        detalle1.setCantidad(2L);
+        detalle1.setSubTotal(20.0);
+
+        DetallePedido detalle2 = new DetallePedido();
+        detalle2.setIdDetallePedido(2L);
+        detalle2.setIdPedido(100L);
+        detalle2.setIdProducto(11L);
+        detalle2.setCantidad(1L);
+        detalle2.setSubTotal(15.0);
+
+        DetallePedido detalle3 = new DetallePedido();
+        detalle3.setIdDetallePedido(3L);
+        detalle3.setIdPedido(100L);
+        detalle3.setIdProducto(12L);
+        detalle3.setCantidad(3L);
+        detalle3.setSubTotal(45.0);
+
+        List<DetallePedido> detalles = List.of(detalle1, detalle2, detalle3);
+
+        // Mock de repositorio
         when(detallePedidoRepository.findByIdPedido(idPedido)).thenReturn(detalles);
 
-        List<DetallePedido> resultado = detallePedidoService.findByIdPedido(idPedido);
+        // Mock de pedido
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(100L);
+        pedido.setIdUsuario(1L);
+        pedido.setIdSucursal(1L);
+        when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
 
+        // Mock de usuario
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(1L);
+        usuario.setNombreUsuario("usuario1");
+        when(usuarioClientRest.findByIdUsuario(1L)).thenReturn(usuario);
+
+        // Mock de sucursal
+        Sucursal sucursal = new Sucursal();
+        sucursal.setIdSucursal(1L);
+        sucursal.setNombreSucursal("Sucursal Central");
+        when(sucursalClientRest.findByIdSucursal(1L)).thenReturn(sucursal);
+
+        // Mock de productos
+        when(productoClientRest.findByIdProducto(anyLong())).thenAnswer(invocation -> {
+            Long idProducto = invocation.getArgument(0);
+            Producto producto = new Producto();
+            producto.setIdProducto(idProducto);
+            producto.setNombreProducto("Producto " + idProducto);
+            producto.setPrecio(10.0);
+            return producto;
+        });
+
+        // Ejecutar servicio
+        List<DetallePedidoResponseDTO> resultado = detallePedidoService.findDetailsByIdPedido(idPedido);
+
+        // Verificaciones
         assertThat(resultado).isNotEmpty();
         assertThat(resultado).hasSize(3);
         assertThat(resultado.get(0).getIdPedido()).isEqualTo(idPedido);
+        assertThat(resultado.get(0).getNombreUsuario()).isEqualTo("usuario1");
 
-        verify(detallePedidoRepository, times(1)).findByIdPedido(idPedido);
+        verify(detallePedidoRepository).findByIdPedido(idPedido);
     }
+
 
     @Test
     @DisplayName("Debe retornar los detalles DTOS de un pedido por su ID")
@@ -389,27 +447,32 @@ public class DetallePedidoServiceImplTest {
     @Test
     @DisplayName("Debe lanzar excepción si no existe el detalle del pedido")
     void debeLanzarExcepcionSiNoExisteDetalle() {
-        // ID que no existe
+        // ID inexistente
         Long idDetalle = 999L;
 
-        // DTO con cualquier cantidad
+        // DTO de entrada con cualquier cantidad
         UpdateCuantidadProductoDetallePedidoDTO dto = new UpdateCuantidadProductoDetallePedidoDTO();
         dto.setCantidad(2L);
 
-        // Simula que no se encuentra el detalle
+        // Simula que el detalle no existe en base de datos
         when(detallePedidoRepository.findById(idDetalle)).thenReturn(Optional.empty());
 
-        // Ejecutar y validar excepción
+        // Ejecutar y verificar que se lanza la excepción con el mensaje correcto
         assertThatThrownBy(() -> detallePedidoService.updateCantidadProductoPedido(idDetalle, dto))
                 .isInstanceOf(DetallePedidosException.class)
-                .hasMessageContaining("No existe el producto de id: " + idDetalle);
+                .hasMessageContaining("No existe el detalle pedido de la id: " + idDetalle);
 
-        // Verifica que no se llamaron otros servicios
+        // Verificar que no se llamaron los otros servicios
         verifyNoInteractions(pedidoClientRest);
-        verifyNoInteractions(inventarioClientRest);
+        verifyNoInteractions(usuarioClientRest);
+        verifyNoInteractions(sucursalClientRest);
         verifyNoInteractions(productoClientRest);
+        verifyNoInteractions(inventarioClientRest);
+
+        // Verificar que no se intentó guardar nada
         verify(detallePedidoRepository, never()).save(any());
     }
+
 
     //PutMapping actualiza detalles. Lanza Exception cuando no hay cantidad de stock
     @Test
@@ -422,28 +485,66 @@ public class DetallePedidoServiceImplTest {
         Long idSucursal = 1L;
 
         UpdateCuantidadProductoDetallePedidoDTO updateDTO = new UpdateCuantidadProductoDetallePedidoDTO();
-        updateDTO.setCantidad(5L); // Se quiere agregar 5
+        updateDTO.setCantidad(5L); // Se quiere subir de 1 a 5 → diferencia de 4
 
-        // DetallePedido actual tiene cantidad 1 y subtotal 1000
-        DetallePedido detallePedido = new DetallePedido(idDetalle, idPedido, idProducto, 1L, 1000.0);
+        // DetallePedido actual con cantidad 1 y subtotal 1000
+        DetallePedido detallePedido = new DetallePedido();
+        detallePedido.setIdDetallePedido(idDetalle);
+        detallePedido.setIdPedido(idPedido);
+        detallePedido.setIdProducto(idProducto);
+        detallePedido.setCantidad(1L);
+        detallePedido.setSubTotal(1000.0);
 
-        // Pedido con sucursal
-        Pedido pedido = new Pedido(idPedido, LocalDateTime.now(), 5000.0, 1L, idSucursal);
+        // Pedido con sucursal y usuario
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(idPedido);
+        pedido.setIdUsuario(1L);
+        pedido.setIdSucursal(idSucursal);
 
-        // Inventario con stock insuficiente (solo 2 unidades disponibles)
-        List<Inventario> inventarios = List.of(new Inventario(10L, idProducto, idSucursal, 2L));
+        // Inventario insuficiente (solo 2 disponibles, pero se necesitan 4)
+        Inventario inventario = new Inventario();
+        inventario.setIdInventario(1L); // si existe este campo
+        inventario.setIdProducto(idProducto);
+        inventario.setIdSucursal(idSucursal);
+        inventario.setCantidad(2L);
+        List<Inventario> inventarios = List.of(inventario);
+
+        // Producto con precio
+        Producto producto = new Producto();
+        producto.setIdProducto(idProducto);
+        producto.setNombreProducto("Producto Test");
+        producto.setPrecio(1000.0);
+
+        // Usuario completo
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(1L);
+        usuario.setNombreUsuario("pedro");
+        usuario.setContraUsuario("contrasena123");
+        usuario.setNombreDelUsuario("Pedro Pérez");
+        usuario.setCorreoUsuario("pedro@example.com");
+        usuario.setRutUsuario("12345678-9");
+        usuario.setDireccionUsuario("1111 Avenida Siempre Viva");
+        usuario.setTelefonoUsuario("+56 912345678");
+
+        // Sucursal
+        Sucursal sucursal = new Sucursal();
+        sucursal.setIdSucursal(idSucursal);
+        sucursal.setNombreSucursal("Sucursal Test");
 
         // Mocks
         when(detallePedidoRepository.findById(idDetalle)).thenReturn(Optional.of(detallePedido));
         when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
+        when(usuarioClientRest.findByIdUsuario(anyLong())).thenReturn(usuario);
+        when(sucursalClientRest.findByIdSucursal(anyLong())).thenReturn(sucursal);
+        when(productoClientRest.findByIdProducto(idProducto)).thenReturn(producto);
         when(inventarioClientRest.findByIdSucursal(idSucursal)).thenReturn(inventarios);
 
-        // Verificar excepción
+        // Ejecutar y verificar la excepción
         assertThatThrownBy(() -> detallePedidoService.updateCantidadProductoPedido(idDetalle, updateDTO))
                 .isInstanceOf(DetallePedidosException.class)
-                .hasMessageContaining("No hay suficientes stock del producto con id: " + idProducto);
+                .hasMessageContaining("No hay suficiente stock disponible para el producto con ID: " + idProducto);
 
-        // Verificar que **no** se llamó a updateQuantity ni a save
+        // Verificar que no se llamó a updateQuantity ni a save
         verify(inventarioClientRest, never()).updateQuantity(any());
         verify(detallePedidoRepository, never()).save(any());
     }
@@ -455,20 +556,39 @@ public class DetallePedidoServiceImplTest {
     void debeEliminarDetallesCuandoExisten() {
         Long idPedido = 100L;
 
-        // Simulamos que hay detalles asociados a ese pedido
-        List<DetallePedido> detalles = List.of(
-                new DetallePedido(1L, idPedido, 10L, 2L, 1000.0),
-                new DetallePedido(2L, idPedido, 20L, 1L, 500.0)
-        );
+        // Crear detalles
+        DetallePedido detalle1 = new DetallePedido();
+        detalle1.setIdDetallePedido(1L);
+        detalle1.setIdPedido(idPedido);
+        detalle1.setIdProducto(10L);
+        detalle1.setCantidad(2L);
+        detalle1.setSubTotal(1000.0);
 
+        DetallePedido detalle2 = new DetallePedido();
+        detalle2.setIdDetallePedido(2L);
+        detalle2.setIdPedido(idPedido);
+        detalle2.setIdProducto(20L);
+        detalle2.setCantidad(1L);
+        detalle2.setSubTotal(500.0);
+
+        List<DetallePedido> detalles = List.of(detalle1, detalle2);
+
+        // Mock pedido
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(idPedido);
+        pedido.setIdUsuario(1L);
+        pedido.setIdSucursal(1L);
+
+        when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
         when(detallePedidoRepository.findByIdPedido(idPedido)).thenReturn(detalles);
 
-        // Ejecutamos el método
+        // Ejecutar método
         detallePedidoService.deleteDetallePedido(idPedido);
 
-        // Verificamos que se llamó a deleteAll con la lista
+        // Verificar que se eliminan los detalles
         verify(detallePedidoRepository).deleteAll(detalles);
     }
+
 
     //DeleteMapping detalles de pedido asociado a una ID. Lanza Exception cuando no hay detalles de pedidos para eliminar
     @Test
@@ -476,14 +596,22 @@ public class DetallePedidoServiceImplTest {
     void debeLanzarExcepcionCuandoNoHayDetallesParaEliminar() {
         Long idPedido = 100L;
 
+        // Pedido existe
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(idPedido);
+        pedido.setIdUsuario(1L);
+        pedido.setIdSucursal(1L);
+
+        when(pedidoClientRest.findById(idPedido)).thenReturn(pedido);
         // Simulamos que no hay detalles para ese pedido
         when(detallePedidoRepository.findByIdPedido(idPedido)).thenReturn(Collections.emptyList());
 
-        // Ejecutamos y verificamos que lance excepción
+        // Ejecutamos y verificamos que lance excepción por no haber detalles
         assertThrows(DetallePedidosException.class, () -> {
             detallePedidoService.deleteDetallePedido(idPedido);
         });
     }
+
 
 
 }
