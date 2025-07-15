@@ -86,7 +86,7 @@ public class PedidoServiceTest {
 
     @Test
     @DisplayName("Debo listar un pedido")
-    public void deboListarUnMedico() {
+    public void deboListarUnPedido() {
         when(pedidoRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(pedidoPrueba));
 
         Pedido resultado = pedidoService.findById(Long.valueOf(1));

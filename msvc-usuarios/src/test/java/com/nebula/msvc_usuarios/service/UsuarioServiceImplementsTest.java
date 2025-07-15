@@ -45,20 +45,7 @@ public class UsuarioServiceImplementsTest {
         usuarioPrueba.setTelefonoUsuario(faker.phoneNumber().phoneNumber());
     }
 
-    @Test
-    @DisplayName("Debe guardar un nuevo usuario")
-    public void debeGuardarUsuarioNuevo() {
-        when(usuarioRepository.findById(usuarioPrueba.getIdUsuario())).thenReturn(Optional.empty());
-        when(usuarioRepository.save(usuarioPrueba)).thenReturn(usuarioPrueba);
 
-        Usuario resultado = usuarioServiceImplements.save(usuarioPrueba);
-
-        assertThat(resultado).isNotNull();
-        assertThat(resultado.getNombreUsuario()).isEqualTo(usuarioPrueba.getNombreUsuario());
-
-        verify(usuarioRepository, times(1)).findById(usuarioPrueba.getIdUsuario());
-        verify(usuarioRepository, times(1)).save(usuarioPrueba);
-    }
 
     @Test
     @DisplayName("Debe lanzar excepción al guardar un usuario ya existente")
@@ -155,6 +142,21 @@ public class UsuarioServiceImplementsTest {
                 .hasMessageContaining("Usuario no encontrado");
 
         verify(usuarioRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    @DisplayName("Debe guardar un nuevo usuario")
+    public void debeGuardarUsuarioNuevo() {
+        when(usuarioRepository.findById(usuarioPrueba.getIdUsuario())).thenReturn(Optional.empty());
+        when(usuarioRepository.save(usuarioPrueba)).thenReturn(usuarioPrueba);
+
+        Usuario resultado = usuarioServiceImplements.save(usuarioPrueba);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNombreUsuario()).isEqualTo(usuarioPrueba.getNombreUsuario());
+
+        verify(usuarioRepository, times(1)).findById(usuarioPrueba.getIdUsuario());
+        verify(usuarioRepository, times(1)).save(usuarioPrueba);
     }
 
     @Test

@@ -28,7 +28,6 @@ public class DetallePedidoController {
     @Autowired
     DetallePedidoService detallePedidoService;
 
-    //Lista los detalles de productos que tiene como parametro Id Pedido
     @GetMapping("/{idPedido}")
     @Operation(
             summary = "Lista los detalles de un pedido",

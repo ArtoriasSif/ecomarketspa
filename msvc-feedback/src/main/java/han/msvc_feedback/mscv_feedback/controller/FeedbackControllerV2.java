@@ -25,9 +25,9 @@ import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-// otros imports omitidos por brevedad
 
-@RestController // Usamos RestController en vez de @Controller
+
+@RestController
 @RequestMapping("/api/v2/feedback")
 @Validated
 @Tag(name = "Feedback ControllerV2", description = "Gestiona las operaciones relacionadas con el feedback de los usuarios sobre productos.")
@@ -39,7 +39,7 @@ public class FeedbackControllerV2 {
     @Autowired
     private FeedbackModelAssembler assembler;
 
-    // FIND BY ID (con HATEOAS)
+
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Feedback>> findByIdFeedback(
             @Parameter(description = "ID del feedback a buscar", required = true) @PathVariable Long id) {
@@ -49,10 +49,10 @@ public class FeedbackControllerV2 {
                 .ok(assembler.toModel(feedback));
     }
 
-    // FIND ALL (con HATEOAS)
+
     @GetMapping()
     public ResponseEntity<CollectionModel<EntityModel<Feedback>>> findAllFeedback() {
-        List<Feedback> feedbacks = feedbackService.findAllFeedbackEntities(); // Asegúrate de tener este método que devuelva List<Feedback>
+        List<Feedback> feedbacks = feedbackService.findAllFeedbackEntities();
         List<EntityModel<Feedback>> feedbackModels = feedbacks.stream()
                 .map(assembler::toModel)
                 .toList();
@@ -63,13 +63,13 @@ public class FeedbackControllerV2 {
         );
     }
 
-    // FIND ALL BY PRODUCT (con HATEOAS)
+
     @GetMapping("/producto/{idProducto}")
     public ResponseEntity<CollectionModel<EntityModel<Feedback>>> findByAllFeedbackProduct(
             @Parameter(description = "ID del producto para el cual buscar feedback", required = true)
             @PathVariable Long idProducto) {
 
-        List<Feedback> feedbacks = feedbackService.findAllFeedbackByProduct(idProducto); // Método nuevo que debe devolver Feedback
+        List<Feedback> feedbacks = feedbackService.findAllFeedbackByProduct(idProducto);
         List<EntityModel<Feedback>> feedbackModels = feedbacks.stream()
                 .map(assembler::toModel)
                 .toList();
@@ -79,7 +79,7 @@ public class FeedbackControllerV2 {
                         linkTo(methodOn(FeedbackControllerV2.class).findByAllFeedbackProduct(idProducto)).withSelfRel())
         );
     }
-    //CREATE
+
     @Operation(summary = "Crear un nuevo feedback", description = "Permite a un usuario enviar un nuevo feedback (comentario o calificación) para un producto.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Feedback creado exitosamente",
@@ -102,7 +102,7 @@ public class FeedbackControllerV2 {
                 .body(feedbackService.createFeedback(feedback));
     }
 
-    //DELETE
+
     @Operation(summary = "Eliminar un feedback por ID", description = "Elimina un feedback específico del sistema utilizando su ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Feedback eliminado exitosamente",
@@ -125,7 +125,7 @@ public class FeedbackControllerV2 {
         }
     }
 
-    //UPDATE
+
     @Operation(summary = "Actualizar un feedback existente", description = "Actualiza el comentario o la calificación de un feedback específico por su ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Feedback actualizado exitosamente",
@@ -151,5 +151,4 @@ public class FeedbackControllerV2 {
                 .body(feedbackService.updateByIdFeedback(id, feedbackDTO));
     }
 
-    // Los demás métodos como create, update, delete pueden permanecer iguales
 }

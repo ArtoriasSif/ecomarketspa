@@ -26,7 +26,7 @@ import java.util.List;
 @Validated
 @RestController
 @Tag(name ="Sucursal", description = "Operaciones CRUD de Sucursal")
-public class SucursalController {
+public class    SucursalController {
 
 
     @Autowired

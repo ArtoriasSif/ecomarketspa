@@ -56,8 +56,8 @@ public class PedidoControllerV2 {
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Obtiene un pedido (V2)",
-            description = "Devuelve un pedido en formato HATEOAS a partir del ID"
+            summary = "Obtiene un pedido",
+            description = "Devuelve un pedido a partir del ID"
     )
     @ApiResponses(value = {
             @ApiResponse(

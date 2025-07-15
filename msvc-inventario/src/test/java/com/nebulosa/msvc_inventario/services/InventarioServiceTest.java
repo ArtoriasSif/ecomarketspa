@@ -51,7 +51,7 @@ public class InventarioServiceTest {
 
         for (long i = 1; i <= 50; i++) {
             inventarios.add(new Inventory(
-                    i, // idInventario
+                    i,
                     faker.number().numberBetween(1L, 100L), // idProducto
                     faker.number().numberBetween(1L, 10L),  // idSucursal
                     faker.number().numberBetween(1L, 200L)  // cantidad
@@ -62,13 +62,13 @@ public class InventarioServiceTest {
     @Test
     @DisplayName("Debe retornar todos los inventarios (50)")
     void debeRetornarTodosLosInventarios() {
-        // Mock
+
         when(inventoryRepository.findAll()).thenReturn(inventarios);
 
-        // Ejecutar
+
         List<Inventory> resultado = inventoryService.findAll();
 
-        // Verificar
+
         assertThat(resultado).isNotNull();
         assertThat(resultado).hasSize(50);
         assertThat(resultado).containsAll(inventarios);
@@ -82,7 +82,7 @@ public class InventarioServiceTest {
         Inventory inventario = inventarios.get(0);
         Long id = inventario.getIdInventario();
 
-        // Mocks de los servicios externos
+
         Product producto = new Product();
         producto.setProductoId(inventario.getIdProducto());
         producto.setNombreProducto("Espada de Astora");
@@ -91,15 +91,15 @@ public class InventarioServiceTest {
         sucursal.setIdSucursal(inventario.getIdSucursal());
         sucursal.setNombreSucursal("Firelink Shrine");
 
-        // Simulaciones de los repos y clientes
+
         when(inventoryRepository.findById(id)).thenReturn(Optional.of(inventario));
         when(productoClientRest.findByIdProducto(inventario.getIdProducto())).thenReturn(producto);
         when(sucursalClientRest.findByIdSucursal(inventario.getIdSucursal())).thenReturn(sucursal);
 
-        // Llamada al método
+
         InventoryResponseDTO resultado = inventoryService.findById(id);
 
-        // Verificaciones
+
         assertThat(resultado).isNotNull();
         assertThat(resultado.getIdInventario()).isEqualTo(id);
         assertThat(resultado.getNombreProducto()).isEqualTo("Espada de Astora");

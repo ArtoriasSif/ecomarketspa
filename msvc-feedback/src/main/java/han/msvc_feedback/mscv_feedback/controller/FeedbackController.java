@@ -105,7 +105,7 @@ public class FeedbackController {
     //FIND BY ID
     @Operation(summary = "Obtener un feedback por ID", description = "Recupera los detalles de un feedback específico utilizando su ID.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Feedback encontrado exitosamente", // Changed from 201 to 200 for GET operations
+            @ApiResponse(responseCode = "200", description = "Feedback encontrado exitosamente",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Feedback.class),
                             examples = @ExampleObject(value = "{\"id\": 1, \"idUsuario\": 101, \"idProducto\": 201, \"calificacion\": 5, \"comentario\": \"Excelente producto, muy recomendado!\"}"))),
@@ -117,7 +117,7 @@ public class FeedbackController {
     public ResponseEntity<Feedback> findByIdFeedback(
             @Parameter(description = "ID del feedback a buscar", required = true) @PathVariable Long id) {
         return ResponseEntity
-                .status(HttpStatus.OK) // Changed from CREATED to OK for GET operations
+                .status(HttpStatus.OK)
                 .body(feedbackService.findByIdFeedback(id));
     }
 
